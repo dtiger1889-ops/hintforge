@@ -1,8 +1,8 @@
 # hintforge
 
-**An agentic framework for spoiler-controlled, activity tracking, game guides.**
+**An agentic framework for spoiler-controlled, activity-tracking game guides.**
 
-A guide for any game, any system, where the user chooses how much help they want and logs your progress for easy resuming even after long period away. It's a loyal sidekick customized to your preferences for spoilers and interaction style that follows you along and helps you out. Markdown + structured-claim convention, OS- and agent-agnostic, consumed by a local AI agent that reads and writes files you control.
+A guide for any game, on any system, where you choose how much help you want and it logs your progress so you can pick up easily even after a long time away. It's a loyal sidekick — customized to your spoiler preferences and interaction style — that tags along and helps you out. Markdown + structured-claim convention, OS- and agent-agnostic, consumed by a local AI agent that reads and writes files you control.
 
 ---
 
@@ -38,7 +38,7 @@ A guide for any game, any system, where the user chooses how much help they want
 
 ## Why hintforge exists
 
-Fan-wiki pages can dump every spoiler on the reader the moment they land if you can see them through the ads. There's no setting for "I want a hint about *this* puzzle but not the boss fight in two hours."
+Fan-wiki pages dump every spoiler on you the moment you land — assuming you can see the page through the ads. There's no setting for "I want a hint about *this* puzzle but not the boss fight in two hours."
 
 hintforge inverts that: **information is opt-in.** Want more? Ask. Want less? Lower the tier back down.
 
@@ -60,7 +60,7 @@ It's also designed as a framework for **multi-contributor truth aggregation** �
 
 **If you want to reduce agent work,** open `setup_answers.txt` in any text editor and fill in what you can — game name, what you want the agent to call you, hint tiers, etc. Anything filled in there, the wizard skips the live question for. Anything left blank, it asks live.
 
-If skipped, the wizard attempts to batch remaining questions into one popup (or one chat message if the agent doesn't support popups) — answer them all together and setup finishes in two or three messages instead of nine.
+If you skip the pre-fill, the wizard attempts to batch the remaining questions into one popup (or one chat message if the agent doesn't support popups) — answer them all together and setup finishes in two or three messages instead of nine.
 
 ### Setup scales to your token budget
 
