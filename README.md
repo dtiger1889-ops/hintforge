@@ -15,12 +15,12 @@ A guide for any game, on any system, where you choose how much help you want and
 - ✅ Persona-flavored delivery — a game-themed voice layer that flavors *how* information is delivered, never *what*.
 - ✅ Structured-claim citation format — every fact carries source, contributor, confidence, last-verified, and tier metadata, written in a form a future aggregator can parse.
 - ✅ One-paste setup wizard with optional pre-fill (`setup_answers.txt`) — answer in a text file ahead of time for the cheapest possible setup, or leave it blank and the wizard asks you live.
-- ✅ Three opt-in capability modules, all default-skipped:
+- ✅ Three opt-in capability modules:
   - **PTT** (push-to-talk) — hold a hotkey to talk to the agent via local Whisper transcription.
   - **TTS** (read-aloud) — Stop hook speaks each agent reply through your speakers in a persona-aware voice.
   - **save-watcher** — reads the game's save file at session start to populate location / inventory / state into the agent's context.
 - ✅ Transparent file-scope guarantees — writes are confined to the framework folder and the per-game folder; no telemetry, no daemons, no privilege elevation, no auto-commits.
-- ✅ Opt-in research-on-demand with cost estimates surfaced before each run; default is "ask as questions arise" so first-day setup never burns a Pro user's cap.
+- ✅ Token-heavy operations (research, content sweeps) are opt-in and flagged before they run; the default is "ask as questions arise" rather than batching research up front. For deep research specifically, see the handoff path below — works with Claude's built-in Research, Gemini Deep Research, ChatGPT Deep Research, or Perplexity.
 - ✅ Stale-session detection — when a fresh session opens on a guide last played >30 days ago, the bot offers a controls + open-thread refresher before resuming. Default threshold 30 days, configurable; safe default is "yes refresh" if the user gives no answer.
 
 **Roadmap:**
@@ -71,9 +71,9 @@ Two paths:
 
 Heavy optional modules (save-watcher, read-aloud / TTS, batch research) can be skipped on low usage caps like Claude Pro tier, and `setup_answers.txt` defaults them to skipped so nothing eats your message cap without consent. Ask your agent after step 10 to set them up if you want them. See [`principles.md`](principles.md) #13 for the full token-aware-execution stance.
 
-### External deep-research handoff (recommended on Pro)
+### Deep-research handoff
 
-If you have access to Gemini Deep Research, ChatGPT Deep Research, or Perplexity, hintforge can externalize the heaviest research step to whichever tool's free tier you prefer — keeping your Claude messages free for actual gameplay. This is the default in `setup_answers.txt` (`research = handoff`).
+If you have access to a deep-research tool — Claude's built-in Research, Gemini Deep Research, ChatGPT Deep Research, or Perplexity — hintforge can hand off the heaviest research step to whichever one you prefer. This is the default in `setup_answers.txt` (`research = handoff`).
 
 Round-trip: Claude writes a brief to `<game>/research_brief.txt` → you paste it into the external tool → save the result file into `<game>/research_inbox/` → in a fresh Claude session say `ingest the research` and Claude distributes it into the guide's subfolders with source-tagged metadata. Step-by-step instructions for the file-drop are in [`OPEN ME if new to AI - How to prompt claude code.txt`](./OPEN%20ME%20if%20new%20to%20AI%20-%20How%20to%20prompt%20claude%20code.txt).
 
@@ -165,7 +165,7 @@ Load-bearing rules summarized. Full set (16 principles + rationale) in [`princip
 
 The reader is non-technical and trusts the framework by trusting the link they were sent. The framework earns that trust by being inspectable in plain language. Easter-egg flavor text is fine; covert behavior is not.
 
-**Token-aware execution.** Heavy operations (game research, content sweeps, multi-source fetching) are opt-in with cost estimates, never auto-running by default. The primary users are paid AI-bot subscribers on capped plans — if setup auto-launches a research burst on day one, the reader hits their cap before getting any guide value. Research and guide-use are separable so the reader can budget across both. The setup wizard is lightweight by default; heavy optional steps (save-watcher, read-aloud / TTS, batch research) default to skipped on Pro tier.
+**Token-aware execution.** Token-heavy operations (game research, content sweeps, multi-source fetching) are opt-in and flagged before they run. The primary users are paid AI-bot subscribers on capped plans — if setup auto-launches a research burst on day one, the reader hits their cap before getting any guide value. Research and guide-use are separable so the reader can budget across both. The setup wizard is lightweight by default; heavy optional steps (save-watcher, read-aloud / TTS, batch research) default to skipped on Pro tier.
 
 **OS-portable + bot-portable by design.** The markdown core (templates, principles, claim format, tier logic) is portable anywhere. What's locked to a specific environment is quarantined: TTS hook (Windows SAPI), default file paths (Windows-flavored), PowerShell snippets in some scripts, and Claude-Code-specific hook configs in the optional modules. A non-Windows reader, or a non-Claude AI bot, can consume the markdown layer directly; OS-specific add-ons need contributor adaptation. The minimum capability bar for a useful agent: read markdown, write markdown, fetch URLs, run a script, take user input across multiple turns. See [`os_compatibility.md`](os_compatibility.md) for the full portability matrix.
 
