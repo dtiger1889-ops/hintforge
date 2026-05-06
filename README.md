@@ -1,4 +1,4 @@
-# hintforge
+# Hintforge
 
 **An agentic framework for spoiler-controlled, activity-tracking game guides.**
 
