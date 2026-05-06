@@ -19,7 +19,7 @@ A guide for any game, on any system, where you choose how much help you want and
   - **PTT** (push-to-talk) — hold a hotkey to talk to the agent via local Whisper transcription.
   - **TTS** (read-aloud) — Stop hook speaks each agent reply through your speakers in a persona-aware voice.
   - **save-watcher** — reads the game's save file at session start to populate location / inventory / state into the agent's context.
-- ✅ Transparent file-scope guarantees — writes are confined to the framework folder and the per-game folder; no telemetry, no daemons, no privilege elevation, no auto-commits.
+- ✅ Transparent file-scope design — the framework instructs the agent to confine writes to the framework folder and the per-game folder; no telemetry, no daemons, no privilege elevation, no auto-commits.
 - ✅ Token-heavy operations (research, content sweeps) are opt-in and flagged before they run; the default is "ask as questions arise" rather than batching research up front. For deep research specifically, see the handoff path below — works with Claude's built-in Research, Gemini Deep Research, ChatGPT Deep Research, or Perplexity.
 - ✅ Stale-session detection — when a fresh session opens on a guide last played >30 days ago, the bot offers a controls + open-thread refresher before resuming. Default threshold 30 days, configurable; safe default is "yes refresh" if the user gives no answer.
 
@@ -54,7 +54,7 @@ It's also designed as a framework for **multi-contributor truth aggregation** �
 
 - **A local AI agent that reads and writes markdown in folders you control.** hintforge is intended to run on any such agent. It's been tested on **Claude Desktop on Windows 11, Pro/Max tier**, which is the supported recipe today. Other surfaces — Claude Code (CLI), Cursor, Aider, MCP-enabled bots — should work but are untested.
 
-- **Don't use Cowork or browser claude.ai for this.** Files don't persist locally between sessions, which breaks the framework's whole storage model. More importantly, Cowork tends to *hallucinate* framework rules instead of loading and following the per-folder `CLAUDE.md` file the framework relies on. The supported agent acts as an interactive file reader: it loads the framework's `CLAUDE.md` on startup, stays inside the rules it finds there, and writes only inside the declared folder scope. The wizard auto-detects an unsupported environment and warns before doing any work. **If you're going to use another agent,** you'll need to rename the `CLAUDE.md` files to whatever that system reads first when opening a project directory.
+- **Don't use Cowork or browser claude.ai for this.** Files don't persist locally between sessions, which breaks the framework's whole storage model. More importantly, Cowork tends to *hallucinate* framework rules instead of loading and following the per-folder `CLAUDE.md` file the framework relies on. The supported agent acts as an interactive file reader: it loads the framework's `CLAUDE.md` on startup and is instructed to stay inside the rules it finds there and confine writes to the declared folder scope. The wizard is designed to detect an unsupported environment and warn before doing any work. **If you're going to use another agent,** you'll need to rename the `CLAUDE.md` files to whatever that system reads first when opening a project directory.
 
 ### Recommended path: pre-fill `setup_answers.txt`
 
@@ -69,7 +69,7 @@ Two paths:
 - **Cheapest:** pre-answer `setup_answers.txt` yourself, then paste the prompt below. The wizard skips every question already answered and runs near-silently.
 - **Most interactive:** open the folder in Claude Desktop and tell the agent to start with one prompt. It walks you through every question live.
 
-Heavy optional modules (save-watcher, read-aloud / TTS, batch research) can be skipped on low usage caps like Claude Pro tier, and `setup_answers.txt` defaults them to skipped so nothing eats your message cap without consent. Ask your agent after step 10 to set them up if you want them. See [`principles.md`](principles.md) #13 for the full token-aware-execution stance.
+Heavy optional modules (save-watcher, read-aloud / TTS, batch research) can be skipped on low usage caps like Claude Pro tier, and `setup_answers.txt` defaults them to skipped so the heavy modules don't run without your say-so. Ask your agent after step 10 to set them up if you want them. See [`principles.md`](principles.md) #13 for the full token-aware-execution stance.
 
 ### Deep-research handoff
 
@@ -154,14 +154,18 @@ Load-bearing rules summarized. Full set (16 principles + rationale) in [`princip
 
 **Median preferences + harm reduction.** Defaults serve the most common player; opt-ins and tier controls protect the minority who want a different experience. Defaults never degrade to accommodate an edge case — gate the edge case instead. This is the *why* behind the spoiler-free defaults: the median reader wants to be surprised by the game, and the minority who want maximum guidance can lift the floor without imposing it on anyone else. When two reader populations are in tension, the resolution is always the same shape: pick the default that serves the larger group, then build an opt-in for the other.
 
-**Transparent operations — no sneaking.** Every action the framework takes is visible to the reader. The non-technical user who pastes a setup command into their AI bot must be able to trust that:
+**Transparent operations — no sneaking.** The non-technical user who pastes a setup command into their AI bot must be able to trust the framework. That trust comes from two layers:
 
-- No hidden dependencies are installed without disclosure.
-- No filesystem changes outside the declared scope (`~/Documents/hintforge/` and the per-game folder it creates).
+What the framework code itself contains (verifiable by reading the repo):
+- No hidden dependencies installed by setup scripts.
 - No background processes, daemons, or "phone home" behavior.
 - No privilege elevation — no UAC, no `sudo`, no admin rights. Everything in user-writable space.
-- Every web fetch is announceable.
-- No silent auto-commit / auto-push. Git is only used at explicit request.
+- No silent auto-commit / auto-push baked into any script. Git is only used at explicit request.
+
+What the framework instructs the agent to do (relies on the agent following the rules in `CLAUDE.md`):
+- Confine filesystem changes to the declared scope (`~/Documents/hintforge/` and the per-game folder it creates).
+- Announce web fetches before running them.
+- Announce file-touching actions before doing them.
 
 The reader is non-technical and trusts the framework by trusting the link they were sent. The framework earns that trust by being inspectable in plain language. Easter-egg flavor text is fine; covert behavior is not.
 
@@ -188,7 +192,7 @@ The reader is non-technical and trusts the framework by trusting the link they w
 - No installer wrapper yet — setup runs via the natural-language paste above.
 
 **Known incompatibilities:**
-- **Cowork** (Anthropic collaborative workspace) — session-scoped (files don't persist locally), and tends to hallucinate framework rules instead of loading and following the per-folder `CLAUDE.md`. The wizard auto-detects this and warns before doing any work.
+- **Cowork** (Anthropic collaborative workspace) — session-scoped (files don't persist locally), and tends to hallucinate framework rules instead of loading and following the per-folder `CLAUDE.md`. The wizard is designed to detect this and warn before doing any work.
 - **claude.ai in a browser** without a filesystem connector — same persistence problem.
 
 Full portability matrix in [`os_compatibility.md`](os_compatibility.md).

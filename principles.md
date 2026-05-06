@@ -132,7 +132,3 @@ Don't paper over thin sourcing with volume. Citing five YouTube comments doesn't
 - When a search comes up empty or contradictory, log the search itself in `limitations.md` — query terms, sources checked, why they were rejected. This is the rejection trail; future searches start where this one stopped.
 - Treat agreement among low-quality sources as a single weak source, not as N corroborating ones. The metadata `confidence: low` belongs on it.
 - Don't pad citation lists. One strong source beside one weak one reads as ambiguous; one strong source alone reads as canonical.
-
-## Why these rules, not others
-
-These come from patterns that actually held up in a real playthrough of a real game over multiple sessions. Rules that didn't survive (auto-delivered nudges, story spoilers traded for "context", per-response timestamps, infinite-log CHECKPOINTs) were dropped. If a future game's experience suggests a new universal rule, propose it here — but it must clear the bar of "this would have prevented an actual mistake," not just "this seems nice."
