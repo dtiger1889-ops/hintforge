@@ -370,7 +370,9 @@ This is the backbone (see `principles.md` Principle #1). Don't skip; don't defau
 
 **Capture:**
 - Subfolder list to create. Default if user can't decide: `puzzles/`, `items/`, `sections/` (the most common three).
-- "Navigation routing" creates `nav/` with a stub `index.md` and a scaffold `nav/architecture.md` (from `templates/architecture.md`). Per-zone files (`nav/<zone>.md`) are created later during P2 research ingestion — not at setup.
+- "Navigation routing" creates `nav/` with a stub `index.md` (from `templates/nav_index.md`) and a scaffold `nav/architecture.md` (from `templates/architecture.md`). Per-zone files (`nav/<zone>.md`) are created later during P2 research ingestion — not at setup.
+
+**Skip rule for nav/:** do NOT recommend or create `nav/` when the game's game-type label is `narrative-no-nav` (Tetris-likes, pure visual novels, games with no meaningful spatial orientation), or when the game uses a rich in-game map system (`localization-mechanism class: none`) and nav questions are rare enough that per-question web-search covers them. If `[RESEARCH_MODE]` is `handoff` or `deep`, the game-type label may not be known until P1 ingestion — in that case, defer the nav/ decision to ingestion: skip the `nav/` checkbox at setup, and let the ingestion step create `nav/` only if P1's Architecture Summary classifies the game as nav-bearing.
 
 ### Step 8 — Research preference (REQUIRED — token-aware; see Principle #13)
 
@@ -489,7 +491,9 @@ This is the backbone (see `principles.md` Principle #1). Don't skip; don't defau
 
 After P1 brief is generated, explain the optional cascade phases and ask:
 
-> **P2 — Localization toolkit + support topology + locks-and-keys** (recommended for most games): three coupled outputs that answer "how does the persona reason about player location at runtime?" — landmark / map prompts for localization, save-station and fast-travel topology per zone, and item-keyed gate annotations on the zone graph. Strongly recommended for dungeon-heavy or landmark-navigated games. Less critical for map-system games (Skyrim-style) where named regions are sufficient.
+> **P2 — Localization toolkit + support topology + locks-and-keys** (recommended for most games): three coupled outputs that answer "how does the persona reason about player location at runtime?" — landmark / map prompts for localization, save-point and fast-travel topology per zone, and item-keyed gate annotations on the zone graph. Strongly recommended for dungeon-heavy or landmark-navigated games. Less critical for map-system games (Skyrim-style) where named regions are sufficient.
+>
+> Runtime: once `nav/architecture.md` exists, the persona applies five nav rules (routing, lookahead, backtrack queries, reachability check, locks-and-keys notifications — see `templates/persona.md`). Lookahead defaults to **N=2 gates forward** from `last_known_gate`; tunable per game in `CHECKPOINT.md` if it fires too early or too late.
 >
 > **P3 — Gaps + DLC layers** (recommended if game has shipped DLC): patches thin coverage from P1 and adds DLC zones to the zone graph. Safe to skip initially and run later if in-play sessions surface gaps.
 

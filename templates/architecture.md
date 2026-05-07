@@ -1,6 +1,6 @@
 # [GAME NAME] — Architecture
 
-**status:** scaffold
+**status:** scaffold <!-- scaffold | research-integrated | live-observed | reconciled -->
 **last_reconciled:** YYYY-MM-DD
 **research_run:** none
 

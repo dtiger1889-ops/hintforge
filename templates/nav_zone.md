@@ -1,6 +1,6 @@
 # Nav — [ZONE NAME]
 
-**status:** scaffold
+**status:** scaffold <!-- scaffold | research-integrated | live-observed | reconciled -->
 **last_reconciled:** YYYY-MM-DD
 **research_run:** none
 
@@ -26,6 +26,14 @@ To `[target-zone-id]` via edge `([this-zone-id], [target-zone-id])`.
 
 [List all exits from this zone, including optional and conditional. Every edge here must match a row in `architecture.md`'s edge table.]
 
+## Entry tips (3 max)
+
+Show before any puzzle solutions when the player arrives at this zone. Anchor to features, never left/right (see `index.md` routing rules). Lead with chest/collectible order if the zone has one; call out any shortcut that forfeits loot; call out any non-obvious correct exit.
+
+1. [tip — feature-anchored, no left/right]
+2. [tip]
+3. [tip]
+
 ## Sequential gates
 
 1. **[short gate name]** — [one sentence: what the player does to pass this gate]. [optional: one sentence on what not to miss or what this unlocks].
@@ -33,7 +41,7 @@ To `[target-zone-id]` via edge `([this-zone-id], [target-zone-id])`.
    - `lock:` [key required, if gate is item-keyed — cross-references architecture.md locks-and-keys table]
 2. **[next gate]** — ...
 
-[Gate granularity guide: 5–15 gates per zone, or 5–15 per branch for branching zones. One gate = one room-to-room transition or one decisive action that opens the next path. Nav-only: if a gate contains a puzzle or enemy encounter, name it as a pointer ("Polymer Ball puzzle here — see `puzzles/polymer_ball.md`") rather than solving inline.]
+[Gate granularity guide: 5–15 gates per zone, or 5–15 per branch for branching zones. One gate = one room-to-room transition or one decisive action that opens the next path. Nav-only: if a gate contains a puzzle or enemy encounter, name it as a pointer (e.g. `<puzzle name>` puzzle here — see `puzzles/<puzzle_name>.md`) rather than solving inline. Use feature anchors, not left/right.]
 
 ## Optional branches / shortcuts
 
