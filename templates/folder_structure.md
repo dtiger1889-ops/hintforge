@@ -29,6 +29,21 @@ Each file: location/access (no spoilers about *getting* there), rewards (with co
 
 Use when the game has reusable, content-dense optional zones worth indexing separately from the main path.
 
+### `nav/`
+
+Use when the game has spatial navigation worth structuring: dungeon-crawlers, hub-and-spoke games, open worlds with discrete zones, or any game where "where do I go?" is a frequent in-play question. Skip for `narrative-no-nav` games (Tetris-like, pure visual novels, games with no meaningful spatial orientation).
+
+Structure:
+- `index.md` — routing rules and how the persona uses this folder. Universal nav discipline (no left/right directional language; flag NORA/save stations on zone entry; 3-tip format for gate descriptions). Landmark prompts for hybrid/landmark-class games.
+- `architecture.md` — **required when nav/ exists.** Zone graph (nodes + typed edges), chapter ↔ zone mapping, optional content registry, support topology (save stations, fast-travel network, hub access), locks-and-keys table. This is the structural backbone for all cross-zone reasoning. Start from `templates/architecture.md`; populate via P1 and P2 research ingestion.
+- One file per navigable zone (`<zone-id>.md`) — sequential gate list, entry/exit references to `architecture.md` by edge ID, optional branches, common confusions, sources. Start from `templates/nav_zone.md`; files created at P2 ingestion time, not during initial setup.
+
+**Zone file naming:** use the canonical zone-id from `architecture.md` (e.g. `polygon_06.md`, `main_04a_sechenov.md`, `dlc_annihilation.md`). One file per zone — not one per chapter.
+
+**When "Navigation routing" is selected in Step 7:** create `nav/index.md` stub and `nav/architecture.md` scaffold immediately. Per-zone files (`nav/<zone>.md`) populate during P2 research ingestion.
+
+**Do not create nav/ if:** game-type-label is `narrative-no-nav`, or the game has a rich in-game map system (map-system class) and nav questions are rare enough that per-question web-search covers them adequately.
+
 ### `items/`
 Universal — every game has things the player carries. Suggested split (adjust to genre):
 

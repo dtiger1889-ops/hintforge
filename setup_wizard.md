@@ -84,6 +84,8 @@ Before any other step, check whether the user has filled in `hintforge/setup_ans
 | `ptt` | `[PTT_ENABLED]` | 6.5 |
 | `ptt_hotkey` | `[PTT_HOTKEY]` | 6.5 |
 | `research` | `[RESEARCH_MODE]` | 8 |
+| `run_p2` | `[RUN_P2]` | 8 |
+| `run_p3` | `[RUN_P3]` | 8 |
 
 **Special handling:**
 
@@ -94,6 +96,8 @@ Before any other step, check whether the user has filled in `hintforge/setup_ans
 - `tts = persona-matched` or `tts = generic` → `[TTS_ENABLED] = true`, `[TTS_STYLE]` set accordingly. Step 6 still runs to do the OS detection / voice selection live.
 - `save_dir = skip` and `game_install_dir = skip` → Step 3 fully skipped; record as `skipped (from setup_answers.txt)`.
 - `research = deep` → still announce the cost estimate and confirm before running, even though pre-filled. Heavy ops always get one final live confirmation.
+- `run_p2 = skip` → `[RUN_P2] = false`. `run_p2 = yes` → `[RUN_P2] = true`. Ignored when `[RESEARCH_MODE]` is not `handoff` or `deep`.
+- `run_p3 = skip` → `[RUN_P3] = false`. `run_p3 = yes` → `[RUN_P3] = true`. Ignored when `[RESEARCH_MODE]` is not `handoff` or `deep`.
 
 **Skip rule for the rest of the wizard:**
 
@@ -359,12 +363,14 @@ This is the backbone (see `principles.md` Principle #1). Don't skip; don't defau
 - "Which content categories does this game have? Check all that apply."
   - [ ] Puzzles / logic challenges
   - [ ] Discrete optional zones (shrines / dungeons / testing grounds / similar)
+  - [ ] Navigation routing (zone-based dungeon layout, points of no return, hub-and-spoke structure)
   - [ ] Items, weapons, abilities
   - [ ] Region-based main path with missable collectibles
   - [ ] Other (free-form)
 
 **Capture:**
 - Subfolder list to create. Default if user can't decide: `puzzles/`, `items/`, `sections/` (the most common three).
+- "Navigation routing" creates `nav/` with a stub `index.md` and a scaffold `nav/architecture.md` (from `templates/architecture.md`). Per-zone files (`nav/<zone>.md`) are created later during P2 research ingestion — not at setup.
 
 ### Step 8 — Research preference (REQUIRED — token-aware; see Principle #13)
 
@@ -384,7 +390,7 @@ This is the backbone (see `principles.md` Principle #1). Don't skip; don't defau
 
 **Handoff sub-procedure (only if `[RESEARCH_MODE] = handoff`):**
 
-1. **Generate the brief.** After Step 9 file-writing completes, write a research prompt to `<game>/research_brief.txt` AND show it inline in chat. The brief is a one-page research request that works whether the reader is the user themselves, a third party they handed it to, or an external tool with no surrounding context.
+1. **Generate the brief.** After Step 9 file-writing completes, write a research prompt to `<game>/research_briefs/p1.txt` AND show it inline in chat. The brief is a one-page research request that works whether the reader is the user themselves, a third party they handed it to, or an external tool with no surrounding context.
 
    **Required structure** (in this order):
 
@@ -392,10 +398,18 @@ This is the backbone (see `principles.md` Principle #1). Don't skip; don't defau
 
    - **Location/world disambiguation** (mandatory; do this before topic research). List in-game location names that share words across distinct areas — two "underwater" zones, a base-game and DLC area sharing a theme, repeated faction names. The researcher keeps them strictly separate. Conflating distinct locations is the most common failure mode and silently corrupts everything downstream; surface it up front so the researcher cannot skip it.
 
-   - **Topic list** (one section per `[SUBFOLDER]`): per topic, **8–12 specific sub-questions** — mix of inventory ("what is here") and mechanism ("why does this work, what triggers it"). Plus these standing prompts on every topic:
-     - **What do mainstream English guides miss?** Look for community-discovered exceptions, undocumented spawns, untested farming spots, mechanics still working after patch notes claimed otherwise, datamining (parsing game files to surface hidden values) findings, accessibility-tagged shortcuts.
-     - **Where does common-knowledge rule X have exceptions?** Treat exceptions as first-class facts, not footnotes. If the wiki says "Mothers are finite," the brief asks where they aren't.
-     - **Mechanism, not just inventory.** For any system that produces, respawns, gates, or unlocks something, ask *why* it works that way and *what triggers it* — not just *what is there*.
+   - **Architecture Summary** (required at top of the researcher's output, before any chapter-organized facts):
+     - **Game-type label** — one of: `dungeon-linear` / `hub-and-spoke-with-dungeons` / `open-world-with-distinct-dungeons` / `open-world-explorative-only` / `procedural` / `on-rails` / `narrative-no-nav`
+     - **Localization-mechanism class** — one of: `map-system` / `landmark` / `hybrid` / `none`
+     - **Chapter / area / mission list** — canonical names + alias set + ordering; disambiguation for shared-name pairs (two "underwater" zones, base-game and DLC areas sharing a theme, repeated faction names)
+     - **Zone list** — every navigable zone (chapter, dungeon, polygon, side-area) with canonical zone-id
+     - **Chapter ↔ zone mapping** — which chapter contains which zones (one chapter may span multiple zones; declare each zone-id separately)
+     - **Zone graph** — nodes (zones + hubs) + typed edges; **required for any game where game-type-label ≠ `narrative-no-nav`**. Edge columns: From / To / Type / Direction / Condition / Point-of-no-return / Notes. Types: `story-gate` / `one-way` / `optional` / `hub-spoke` / `fast-travel` / `conditional`. Point-of-no-return subtypes: `permanent` / `chapter-bound` / `missable-trigger` / `point-of-divergence`.
+     - **DLC list** — with chapter / zone mappings
+     - **Optional content registry** — cross-zone optional content with unlock conditions, access windows, parent zones, recommended chapter, failure modes (`missable` / `always-available` / `NG+-only`)
+     - **Source-language set** — dev-country language + top-3 player-region languages (used to enforce the non-English source floor below)
+
+   - **Chapter-organized facts** (rest of the researcher's output; after Architecture Summary): per chapter — 1–2 lines of context, then facts as bullets. Each fact carries: `vector:` tag + `spoiler:` tag + per-fact source attribution. **Vector tag taxonomy:** `nav` (gate/area-traversal) · `puzzle` (solutions, mechanics) · `item` (weapons, consumables, key items) · `boss` (strategies, weaknesses) · `enemy` (non-boss patterns) · `lore` (story beats) · `mechanic` (game-system rules) · `structure` (zone-graph edges, optional content registry entries, support topology, locks-and-keys — integrator routes these to `nav/architecture.md`) · `missable` (secondary tag; combine as `vector: item, missable: yes`). Standing prompts on every chapter: What do mainstream English guides miss? What exceptions exist to apparent rules? Mechanism not inventory — *why* and *what triggers*, not just *what is here*.
 
    - **Source diversity floor** (per topic, not per brief):
      - **Minimum 5 independent sources** before any fact is marked confirmed.
@@ -429,22 +443,24 @@ This is the backbone (see `principles.md` Principle #1). Don't skip; don't defau
      5. Flagged at least one common-knowledge rule that has documented exceptions.
      6. Covered late-game and DLC content where it exists; did not stop at the early game.
 
+   - **Internationalization rule** — ≥1 non-English source per chapter area; drawn from the source-language set declared in the Architecture Summary. LLM translation is acceptable; flag translated facts with `[translated from: <lang>]`. "Checked, nothing English missed" is a valid positive finding. Padding with low-quality sources to hit a quota is not.
+
    - **Filename + drop-zone instruction** (verbatim):
 
      ```
-     Save output as `research_results.<ext>` (.txt, .md, or .docx).
-     Place the file in `<game>/research_inbox/`.
+     Save output as `p1.txt` or `p1.md`.
+     Place the file in `<game>/research_inbox/p1/` (create the folder if it doesn't exist).
      ```
 
    No pronouns referring to "the wizard," "the framework," or "an AI agent" — the recipient doesn't need that context to act on the request.
 
-2. **Create the drop zone.** `mkdir <game>/research_inbox/` and write a `.gitkeep` containing the literal text: `Drop research result files here.`
+2. **Create directories.** Create `<game>/research_briefs/` (for briefs) and `<game>/research_inbox/p1/` (for P1 results). Write a `.gitkeep` in each containing the literal text: `Drop research result files here.` If `[RUN_P2] = true`, also create `<game>/research_inbox/p2/`. If `[RUN_P3] = true`, also create `<game>/research_inbox/p3/`.
 
 3. **Tell the user how to operate the handoff.** Show this verbatim closing message:
 
    ```
-   Brief: <game>/research_brief.txt
-   Drop zone: <game>/research_inbox/
+   P1 brief:      <game>/research_briefs/p1.txt
+   P1 drop zone:  <game>/research_inbox/p1/
 
    Recommended external tool by your Claude tier:
      Max / Team / Enterprise   Claude Research on claude.ai
@@ -453,25 +469,53 @@ This is the backbone (see `principles.md` Principle #1). Don't skip; don't defau
    (Recommendations as of May 2026 — benchmarks shift; substitute freely.)
 
    A. Run it yourself
-      1. Paste research_brief.txt into the tool above.
-      2. Save the output to <game>/research_inbox/.
+      1. Paste p1.txt into the tool above.
+      2. Save the output to <game>/research_inbox/p1/.
       3. In a fresh Claude Code session here: "ingest the research".
 
    B. Hand off to someone else
-      1. Send them research_brief.txt.
-      2. When their result file appears in research_inbox/, open a
+      1. Send them p1.txt.
+      2. When their result file appears in research_inbox/p1/, open a
          fresh session and say "ingest the research".
 
    Use a fresh session for ingestion — it's the largest single context
-   load this guide will see.
+   load this guide will see. Run P1 ingestion before P2 (P1 creates the
+   architecture.md scaffold that P2 extends).
    ```
 
-4. **Mark CHECKPOINT.md** with `Research preferences: handoff (brief generated YYYY-MM-DD; awaiting results in research_inbox/)` so a fresh session knows where to look.
+4. **Mark CHECKPOINT.md** with `Research preferences: cascade-handoff (P1 brief generated YYYY-MM-DD; P2: [generated/skipped]; P3: [generated/skipped]; awaiting results in research_inbox/p1/)` so a fresh session knows where to look.
+
+**Cascade phases (P2 and P3 — only when `[RESEARCH_MODE] = handoff` or `deep`):**
+
+After P1 brief is generated, explain the optional cascade phases and ask:
+
+> **P2 — Localization toolkit + support topology + locks-and-keys** (recommended for most games): three coupled outputs that answer "how does the persona reason about player location at runtime?" — landmark / map prompts for localization, save-station and fast-travel topology per zone, and item-keyed gate annotations on the zone graph. Strongly recommended for dungeon-heavy or landmark-navigated games. Less critical for map-system games (Skyrim-style) where named regions are sufficient.
+>
+> **P3 — Gaps + DLC layers** (recommended if game has shipped DLC): patches thin coverage from P1 and adds DLC zones to the zone graph. Safe to skip initially and run later if in-play sessions surface gaps.
+
+Ask:
+- "Run P2? (**recommended** for most games / skip)"
+- "Run P3? (yes if game has shipped DLC / **skip**)"
+
+Capture `[RUN_P2]` and `[RUN_P3]`.
+
+**If `[RUN_P2] = true`:** Generate P2 brief to `<game>/research_briefs/p2.txt`. P2 brief requests:
+- **Per-zone gate-lists** (one subsection per zone): ordered sequential gates (5–15 per zone, or 5–15 per branch for branching zones); entry / exit / outgoing edges referencing `architecture.md` by edge `(from, to)` pair; optional branches, common confusions, soft-lock warnings, sources. Nav-only — puzzles and enemies referenced by name as pointers, not solved inline.
+- **Support topology augmentation** for `architecture.md`: save stations per zone with in-zone location descriptions; fast-travel network nodes; hub access points.
+- **Locks-and-keys table** for `architecture.md`: every item-keyed gate — lock location (zone + description), key required, key source zone, whether lock is visible before key, notes.
+
+Drop zone: `<game>/research_inbox/p2/`. Ingest P1 before P2 — P1 creates the `architecture.md` scaffold that P2 extends.
+
+**If `[RUN_P3] = true`:** Generate P3 brief to `<game>/research_briefs/p3.txt`. Scope explicitly: list the thin chapters from P1 results and any DLC zones. Same cascade output shape as P1 (Architecture Summary section for DLC-introduced zones + chapter-organized vector-tagged facts). DLC-introduced zone nodes and edges extend the zone graph; DLC-keyed locks extend the locks-and-keys table.
+
+Drop zone: `<game>/research_inbox/p3/`.
+
+---
 
 **Ingestion procedure (runs in a later session, triggered by "ingest the research" or an attached file):**
 
-- **Find the result file.** First check `<game>/research_inbox/` — pick up any file there that isn't `.gitkeep`. If multiple files, ingest each one. If the user attached a file via `@path` or pasted content, use that instead and skip the inbox check. If the inbox is empty AND no file was attached, ask the user where the result is.
-- Read `research_brief.txt` first (so the bot knows what was asked) and the result file(s).
+- **Find the result file.** Check `<game>/research_inbox/` subdirs in order: `p1/`, `p2/`, `p3/`. Pick up any file that isn't `.gitkeep`. Ingest in phase order — P1 first (creates `architecture.md` scaffold), then P2 (extends it), then P3 (patches gaps). If the user attached a file directly, use that instead and ask which phase it belongs to. If all inboxes are empty and no file was attached, ask the user where the result is.
+- Read the corresponding phase brief from `<game>/research_briefs/p1.txt` (or `p2.txt`, `p3.txt`) first (so the bot knows what was asked), then the result file(s).
 - Read `../hintforge/templates/claim_format.md` to confirm the metadata convention before writing.
 
 - **Spoiler classification pass (mandatory, runs as a separate sub-agent before content is written).** Deep research is generated unfiltered; spoiler scoping happens here. Spawn a `general-purpose` Agent with the result file(s) plus the user's current `enemy_tier` and `puzzle_tier`. The sub-agent's job:
@@ -482,13 +526,28 @@ This is the backbone (see `principles.md` Principle #1). Don't skip; don't defau
 
   Why a separate agent: holding "go maximum depth" and "filter by spoiler tier" in the same context produces shallow research; classification needs the full result in front of it without the depth-pressure that produced the result. The split also makes tier raises cheap later — the user advances, the main agent re-runs the *display* filter against already-classified content, no re-research needed.
 
-- **After classification:** read each existing `<subfolder>/index.md` to see what's there. Append to `index.md` — do not create a parallel `claims.md` file, do not overwrite existing content.
-- Distribute content by topic match (mech specs → `mechs/index.md`, weapon tables → `items/index.md`, etc.). Preserve tabular structure; don't flatten tables to prose.
+- **After classification:** distribute classified facts by vector tag to the game's folder taxonomy. Do not overwrite existing content; append or create per-file.
+
+  | Vector tag | Destination |
+  |---|---|
+  | `nav` | `nav/<zone>.md` — create from `templates/nav_zone.md` if the file doesn't exist |
+  | `structure` | `nav/architecture.md` — zone-graph edges, optional content registry entries, support topology, locks-and-keys |
+  | `puzzle` | `puzzles/<puzzle_name>.md` |
+  | `item` | `items/<category>.md` |
+  | `boss` | per-game mapping (optional-zone boss → discrete-zone file; main-story boss → `sections/<area>.md`) |
+  | `enemy` | `reference.md` or `warning_tiers.md` |
+  | `lore` | `sections/<area>.md` |
+  | `mechanic` | `reference.md` or `meta_explainer.md` |
+  | `missable` | primary-vector destination + index entry in `sections/<area>.md` |
+
+  For `nav` and `structure` facts: if `nav/` doesn't exist, create it (stub `index.md` + scaffold `architecture.md` from templates). Set `status: research-integrated` on each newly written file. After writing all per-zone files, run a consistency pass: every edge declared in a zone file must appear in `architecture.md`'s edge table, and vice versa. Drift between them is a bug.
+
+  For all other vectors: preserve tabular structure; don't flatten tables to prose.
 - Tag each new section with the inline metadata line `_source: <tool> <date> · confidence: <high|medium|low> · enemy-tier: <N> · puzzle-tier: <N> · category: mainline · spoiler: <tier>_`. Confidence: `high` if the source named a verifiable fact, `medium` if the value might vary by patch (item weights, exact damage numbers), `low` if it's an inference. `enemy-tier` and `puzzle-tier` come from the classification pass, not the user's current settings — that way display-time filtering can compare user's *current* tier against the *content's* tier and gate accordingly. Default `category` is `mainline`; use `easter-egg` for hidden / side-objective content and `lore` for worldbuilding (hidden until the reader opts in).
 - Update `CHECKPOINT.md`:
-  - `Research preferences: handoff (ingested YYYY-MM-DD from <source-tool>)`
-  - Add a `## Harness changelog` entry: which subfolders received content, total approximate token count, any caveats.
-- Move the ingested file out of `research_inbox/` into `research_inbox/_processed/` (create the subfolder if needed) so a future "ingest the research" run doesn't double-process it.
+  - `Research preferences: cascade-handoff (P1 ingested YYYY-MM-DD from <source-tool>; P2: ingested/pending/skipped; P3: ingested/pending/skipped)`
+  - Add a `## Harness changelog` entry: which phase was ingested, which subfolders received content, approximate token count, any caveats.
+- Move the ingested file out of `research_inbox/<phase>/` into `research_inbox/<phase>/_processed/` (create the subfolder if needed) so a future "ingest the research" run doesn't double-process it.
 - Show the user a one-screen recap: subfolders touched, sections added per subfolder, any `confidence: medium` flags, anything the brief asked for that the result didn't cover.
 
 **Note for the user:**
@@ -522,6 +581,8 @@ About to set up:
   PTT hotkey:       [PTT_HOTKEY]             (from setup_answers.txt)     ← Step 6.5 (or "n/a")
   Subfolders:       [list]                                                ← Step 7
   Research mode:    [RESEARCH_MODE]          (from setup_answers.txt)     ← Step 8
+  Run P2:           [RUN_P2]                 (from setup_answers.txt)     ← Step 8 (n/a if research ≠ handoff/deep)
+  Run P3:           [RUN_P3]                 (from setup_answers.txt)     ← Step 8 (n/a if research ≠ handoff/deep)
 
 Proceed? (yes / no / edit)
 ```

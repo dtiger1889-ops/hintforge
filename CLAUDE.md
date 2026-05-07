@@ -1,5 +1,5 @@
 # hintforge — Game-Guide Framework
-<!-- v16 — 2026-05-05 -->
+<!-- v17 — 2026-05-07 -->
 
 Framework + templates for spoiler-controlled, persona-flavored, GitHub-distributable game guides. Per-game guides instantiated from these templates live in **`../Guides/<game>/`** (a sibling `Guides/` folder next to `hintforge/`), not inside this folder. hintforge contains only the framework — no project state, no dev artifacts.
 
@@ -9,6 +9,8 @@ Framework + templates for spoiler-controlled, persona-flavored, GitHub-distribut
 
 ## Folder map
 - `principles.md` — 16 universal rules; #1 is user-controlled assistance levels (the backbone)
+- `templates/architecture.md` — zone graph + chapter-zone mapping + optional content + support topology + locks-and-keys scaffold
+- `templates/nav_zone.md` — per-zone gate-list scaffold (entry, exit, sequential gates, optional branches, common confusions)
 - `instantiation.md` — manual step-by-step for spinning up a new game guide
 - `setup_wizard.md` — first-run prompt-flow spec for an AI-bot-driven setup
 - `os_compatibility.md` — verified-running setup, OS+bot portability roadmap
