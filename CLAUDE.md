@@ -1,5 +1,5 @@
 # hintforge — Game-Guide Framework
-<!-- v19 — 2026-05-07 -->
+<!-- v20 — 2026-05-07 -->
 
 Framework + templates for spoiler-controlled, persona-flavored, GitHub-distributable game guides. Per-game guides instantiated from these templates live in **`../Guides/<game>/`** (a sibling `Guides/` folder next to `hintforge/`), not inside this folder. hintforge contains only the framework — no project state, no dev artifacts.
 
@@ -13,8 +13,9 @@ Framework + templates for spoiler-controlled, persona-flavored, GitHub-distribut
 - `templates/nav_index.md` — per-game `nav/index.md` scaffold (universal nav discipline: no left/right, save-point flagging, 3-tip entry format)
 - `templates/nav_zone.md` — per-zone gate-list scaffold (entry, exit, sequential gates, optional branches, common confusions)
 - `templates/localization.md` — landmark→zone resolution + ask-the-player prompts (required for `landmark` / `hybrid` localization classes)
-- `instantiation.md` — manual step-by-step for spinning up a new game guide
+- `instantiation.md` — manual step-by-step for spinning up a new game guide; includes regeneration-discipline rule (what survives a wipe-and-regen)
 - `setup_wizard.md` — first-run prompt-flow spec for an AI-bot-driven setup
+- `ingestion.md` — research-cascade result integration; runs in a fresh session triggered by "ingest the research"
 - `os_compatibility.md` — verified-running setup, OS+bot portability roadmap
 - `distribution.md` — GitHub-first publishing + aggregator + wiki-gen vision
 - `templates/` — copy these into a new game folder and fill in placeholders

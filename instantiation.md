@@ -78,6 +78,19 @@ Future flow — see `distribution.md` for the design. Until built:
 
 When the publishing wrapper ships, this section gets filled in with: GitHub repo creation, CI for claim-format validation, contributor onboarding, etc.
 
+## Regeneration discipline — what survives a wipe-and-regen
+
+A guide may eventually be wiped and regenerated from a refreshed cascade pass (new framework version, revised research, scrap-and-rebuild after structural drift). When that happens, the following survive — never auto-overwritten by regeneration:
+
+1. **`CHECKPOINT.md`** — per-game state. Includes the `player_position` block when present. Survival is unconditional; a regeneration that touches CHECKPOINT.md is a bug.
+2. **Loadouts** — the user's actually-played-with weapon trees, build choices, ability picks, spec selections. Wherever they live in the game folder (`reference.md`, a dedicated `loadouts.md`, etc.).
+3. **Live-observed truths** the user has explicitly flagged as authoritative — in-game text the user transcribed, post-game-state routes the user discovered, save-station locations the user verified. Higher fidelity than research; supersedes research output on conflict (per the integration discipline at the bottom of `setup_wizard.md` Step 8).
+4. **Infrastructure** — `.claude/` settings + hooks, push-to-talk / TTS module installs, save-watcher scripts, `persona.md` if it carries customization beyond the template defaults.
+
+Everything else — scaffold files, single-research-run integrations, generic content distributed by the ingestion pass — is wiped and regenerated. Per-game preservation lists (the concrete file inventory for a specific game) are separate per-guide artifacts, drafted alongside the guide.
+
+This rule exists because regeneration is a real workflow (atomic_heart scrap-and-rebuild precedent), not a hypothetical. Without a checked-in preservation list, every regen has to re-derive what to keep.
+
 ## After instantiation: feedback loop
 
 After ~1 week of use, revisit `hintforge/templates/` and revise based on what didn't fit:

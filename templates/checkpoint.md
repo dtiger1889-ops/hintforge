@@ -26,7 +26,7 @@ Spoiler-controlled playthrough on [PLATFORM]. Cowork acts as live reference for 
 - **Stored:** [...]
 - **Loadout / build:** [...]
 
-## Player position (omit if game-type-label is `narrative-no-nav`)
+## Player position (omit if `localization-mechanism class` in `nav/architecture.md` is `none` — e.g., procedural roguelikes with abstract level structure, narrative-only games, puzzle games. This file survives any wipe-and-regen of the guide; never auto-overwritten.)
 
 ```yaml
 player_position:

@@ -12,6 +12,7 @@ Cross-zone structural primitives. The persona reads this file for all cross-zone
 **Localization-mechanism class:** [map-system | landmark | hybrid | none]
 **Entry node:** [zone-id where a new game starts]
 **Hub nodes:** [list of zone-ids serving as hubs, or "none"]
+**Source-language set:** [dev-country language + top-3 player-region languages — drives the internationalization rule's non-English source mandate at research time]
 
 **Nodes:**
 - [zone-id] — [canonical name]

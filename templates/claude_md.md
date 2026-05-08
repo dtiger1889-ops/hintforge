@@ -29,4 +29,4 @@ This folder is a spoiler-controlled, [PERSONA1]-or-[PERSONA2]-flavored reference
 - When research adds new info, update the relevant subfolder file — don't bloat `reference.md`.
 - Every fact: structured-claim form with source + confidence.
 
-> Framework: `../../hintforge/`. See `../../hintforge/principles.md` for the full rule set and `../../hintforge/templates/claim_format.md` for source-citation conventions.
+> Framework: `../../hintforge/`. See `../../hintforge/principles.md` for the full rule set, `../../hintforge/templates/claim_format.md` for source-citation conventions, and `../../hintforge/ingestion.md` when the user says "ingest the research" (cascade result integration; runs in a fresh session).

@@ -517,45 +517,7 @@ Drop zone: `<game>/research_inbox/p3/`.
 
 ---
 
-**Ingestion procedure (runs in a later session, triggered by "ingest the research" or an attached file):**
-
-- **Find the result file.** Check `<game>/research_inbox/` subdirs in order: `p1/`, `p2/`, `p3/`. Pick up any file that isn't `.gitkeep`. Ingest in phase order — P1 first (creates `architecture.md` scaffold), then P2 (extends it), then P3 (patches gaps). If the user attached a file directly, use that instead and ask which phase it belongs to. If all inboxes are empty and no file was attached, ask the user where the result is.
-- Read the corresponding phase brief from `<game>/research_briefs/p1.txt` (or `p2.txt`, `p3.txt`) first (so the bot knows what was asked), then the result file(s).
-- Read `../hintforge/templates/claim_format.md` to confirm the metadata convention before writing.
-
-- **Spoiler classification pass (mandatory, runs as a separate sub-agent before content is written).** Deep research is generated unfiltered; spoiler scoping happens here. Spawn a `general-purpose` Agent with the result file(s) plus the user's current `enemy_tier` and `puzzle_tier`. The sub-agent's job:
-  1. Read every fact in the result. Validate or assign a per-fact `spoiler:` tag — `none` / `progression` / `late-game` / `story` / `dlc:<name>`. Untagged content is unsafe; the sub-agent must classify everything.
-  2. For each fact, derive the metadata `enemy-tier` and `puzzle-tier` from its spoiler tag. `none` → tier 0; `progression` → 1; `late-game` → 2; `story` → 3; `dlc:<name>` → tier-of-dlc-content + dlc flag.
-  3. Output a classified version of the result with each fact prefixed by its tags, preserving original wording verbatim. No omissions; high tiers get tagged for gated display, not deleted.
-  4. Surface ambiguous calls in a short report — facts where the spoiler tier wasn't clear from context — for the main agent to confirm with the user before appending.
-
-  Why a separate agent: holding "go maximum depth" and "filter by spoiler tier" in the same context produces shallow research; classification needs the full result in front of it without the depth-pressure that produced the result. The split also makes tier raises cheap later — the user advances, the main agent re-runs the *display* filter against already-classified content, no re-research needed.
-
-- **After classification:** distribute classified facts by vector tag to the game's folder taxonomy. Do not overwrite existing content; append or create per-file.
-
-  | Vector tag | Destination |
-  |---|---|
-  | `nav` | `nav/<zone>.md` — create from `templates/nav_zone.md` if the file doesn't exist |
-  | `structure` | `nav/architecture.md` — zone-graph edges, optional content registry entries, support topology, locks-and-keys |
-  | `puzzle` | `puzzles/<puzzle_name>.md` |
-  | `item` | `items/<category>.md` |
-  | `boss` | per-game mapping (optional-zone boss → discrete-zone file; main-story boss → `sections/<area>.md`) |
-  | `enemy` | `reference.md` or `warning_tiers.md` |
-  | `lore` | `sections/<area>.md` |
-  | `mechanic` | `reference.md` or `meta_explainer.md` |
-  | `missable` | primary-vector destination + index entry in `sections/<area>.md` |
-
-  For `nav` and `structure` facts: if `nav/` doesn't exist, create it (stub `index.md` + scaffold `architecture.md` from templates). Set `status: research-integrated` on each newly written file. After writing all per-zone files, run a consistency pass: every edge declared in a zone file must appear in `architecture.md`'s edge table, and vice versa. Drift between them is a bug.
-
-  For `landmark` and `hybrid` localization-mechanism classes: also write the P2 brief's localization-toolkit output to `nav/localization.md` (create from `templates/localization.md` if absent). Skip for `map-system` and `none`-class games.
-
-  For all other vectors: preserve tabular structure; don't flatten tables to prose.
-- Tag each new section with the inline metadata line `_source: <tool> <date> · confidence: <high|medium|low> · enemy-tier: <N> · puzzle-tier: <N> · category: mainline · spoiler: <tier>_`. Confidence: `high` if the source named a verifiable fact, `medium` if the value might vary by patch (item weights, exact damage numbers), `low` if it's an inference. `enemy-tier` and `puzzle-tier` come from the classification pass, not the user's current settings — that way display-time filtering can compare user's *current* tier against the *content's* tier and gate accordingly. Default `category` is `mainline`; use `easter-egg` for hidden / side-objective content and `lore` for worldbuilding (hidden until the reader opts in).
-- Update `CHECKPOINT.md`:
-  - `Research preferences: cascade-handoff (P1 ingested YYYY-MM-DD from <source-tool>; P2: ingested/pending/skipped; P3: ingested/pending/skipped)`
-  - Add a `## Harness changelog` entry: which phase was ingested, which subfolders received content, approximate token count, any caveats.
-- Move the ingested file out of `research_inbox/<phase>/` into `research_inbox/<phase>/_processed/` (create the subfolder if needed) so a future "ingest the research" run doesn't double-process it.
-- Show the user a one-screen recap: subfolders touched, sections added per subfolder, any `confidence: medium` flags, anything the brief asked for that the result didn't cover.
+**Ingestion procedure** runs in a **fresh session** (per Step 10's handoff message) when the user types "ingest the research" or attaches a result file. The procedure lives in [`../hintforge/ingestion.md`](ingestion.md) — its own file so the ingestion session loads only what it needs, not the wizard's first-run setup steps. Briefs are written here at setup; ingestion runs there later.
 
 **Note for the user:**
 - The default `none` is fine. You can run research later by saying "research the puzzles" / "research everything you can" / etc.
