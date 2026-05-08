@@ -477,6 +477,13 @@ This is the backbone (see `principles.md` Principle #1). Don't skip; don't defau
       2. Save the output to <game>/research_inbox/p1/.
       3. In a fresh Claude Code session here: "ingest the research".
 
+   Shortcut for claude.ai users: if your plan supports Research mode +
+   the Filesystem connector, paste the brief into a Research-mode chat
+   with Filesystem enabled and tell it the absolute path to
+   <game>/research_inbox/p1/. Claude writes the result file directly
+   into the inbox folder — no manual copy/save. Add "don't summarize,
+   only put it in the brief file" to keep the chat clean.
+
    B. Hand off to someone else
       1. Send them p1.txt.
       2. When their result file appears in research_inbox/p1/, open a
