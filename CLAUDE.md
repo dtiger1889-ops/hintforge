@@ -1,5 +1,5 @@
 # hintforge — Game-Guide Framework
-<!-- v20 — 2026-05-07 -->
+<!-- v21 — 2026-05-07 -->
 
 Framework + templates for spoiler-controlled, persona-flavored, GitHub-distributable game guides. Per-game guides instantiated from these templates live in **`../Guides/<game>/`** (a sibling `Guides/` folder next to `hintforge/`), not inside this folder. hintforge contains only the framework — no project state, no dev artifacts.
 
@@ -19,6 +19,12 @@ Framework + templates for spoiler-controlled, persona-flavored, GitHub-distribut
 - `os_compatibility.md` — verified-running setup, OS+bot portability roadmap
 - `distribution.md` — GitHub-first publishing + aggregator + wiki-gen vision
 - `templates/` — copy these into a new game folder and fill in placeholders
+
+## When this folder is opened in a new session
+
+If the user's first message asks to **build / make / create / set up a guide** for a game (any phrasing — "build me a guide for X", "make me a guide for X", "I want to play X with this framework", "make hintforge work for X", "start a new guide", "set up X", "add game X"), the **first action** is to read `setup_wizard.md` end-to-end and run that wizard from Step -1. Do not infer answers, do not scaffold files, do not write personas, do not skip Step 8. The wizard's Hard rule (every step DONE / DONE-VIA-PREFILL / ASKED ABOUT) is binding.
+
+If `../Guides/<game>/` already exists with content from a prior wizard run, the wizard's already been run — answer the user's actual question directly using the guide's contents. The wizard runs once per (user, game) pair.
 
 ## Hard rules (apply to every guide built with this framework)
 - **User chooses assistance level.** Two tiers (enemy 0–5, puzzle 0–3) set at setup, changeable any time. Backbone, not feature.

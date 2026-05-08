@@ -10,10 +10,10 @@ Once per (user, game) pair — when a user adds a new game to their workspace. N
 
 Any of:
 - User runs an installer command and hasn't yet picked a game
-- User opens the hintforge folder in their AI bot and types "set up a new game" / "add game" / similar
+- User opens the hintforge folder in their AI bot and types any of: **"set up a new game"**, **"add game"**, **"build me a guide for [X]"**, **"make me a guide for [X]"**, **"create a guide for [X]"**, **"start a new guide"**, **"I want to play [X] with this framework"**, **"set up [X]"** — or any natural-language variant whose intent is "instantiate the framework against a new game"
 - A `setup_complete` flag in the hintforge folder doesn't yet exist for the named game
 
-Until the installer milestone implements the trigger plumbing, the AI bot uses common sense: if the user names a game and there's no folder for it, run the wizard.
+Until the installer milestone implements the trigger plumbing, the AI bot uses common sense: **if the user names a game and `../Guides/<game>/` is empty or missing, the wizard MUST run before any other action — including casual answers like "I'll write you a persona" or "I'll scaffold the folder for you." Skipping the wizard to be helpful is a bug.**
 
 ## The user's expected entry path (future target)
 
@@ -392,6 +392,8 @@ This is the backbone (see `principles.md` Principle #1). Don't skip; don't defau
 
 **Handoff sub-procedure (only if `[RESEARCH_MODE] = handoff`):**
 
+> **Don't declare Step 8 done until the brief files are written.** Step 9 will refuse to print the Step 10 handoff if `<game>/research_briefs/p1.txt` doesn't exist on disk (and `p2.txt` / `p3.txt` if `[RUN_P2]` / `[RUN_P3]` were yes). Capturing `[RESEARCH_MODE] = handoff` in the summary table is not the same as having written the brief; the artifact is the gate.
+
 1. **Generate the brief.** After Step 9 file-writing completes, write a research prompt to `<game>/research_briefs/p1.txt` AND show it inline in chat. The brief is a one-page research request that works whether the reader is the user themselves, a third party they handed it to, or an external tool with no surrounding context.
 
    **Required structure** (in this order):
@@ -573,8 +575,9 @@ If yes, the AI agent:
 5. If `[SAVE_DIR]` provided: scaffolds `<game>/save_watcher.py` from the documented pattern
 6. If TTS enabled and Windows: scaffolds `<game>/.claude/tts_hook.ps1`
 7. Adds the project to the workspace ledger (`<WORKSPACE_ROOT>/CLAUDE.md`)
-8. **Only if `[RESEARCH_MODE]` ≠ `none`:** runs the chosen research bundle, announcing each URL as it's fetched. Stops when the budget is consumed.
-9. Prints the setup-complete message + fresh-session handoff (see Step 10).
+8. **Only if `[RESEARCH_MODE]` ≠ `none`:** runs the chosen research bundle (in-house) or generates the handoff briefs (handoff mode), announcing each URL or brief file as it's written. For in-house modes (`minimal` / `standard` / `deep`) stops when the budget is consumed.
+9. **Brief-artifact gate (handoff/deep modes only).** If `[RESEARCH_MODE]` is `handoff` or `deep`, verify on disk that `<game>/research_briefs/p1.txt` exists and is non-empty. If `[RUN_P2]` is yes, verify `<game>/research_briefs/p2.txt`. If `[RUN_P3]` is yes, verify `<game>/research_briefs/p3.txt`. **If any required brief is missing, do NOT print the Step 10 handoff message. Stop and report the missing artifact, then back up to the brief-generation sub-procedure of Step 8.** A handoff-mode setup that doesn't ship a P1 brief has not completed Step 8 even if the Step 9 summary table looks fully filled — the variable-must-have-value enforcement catches missing answers but not missing artifacts; this gate catches the latter.
+10. Prints the setup-complete message + fresh-session handoff (see Step 10).
 
 **Output formatting — backtick filenames and paths.** When the wizard prints any "what was installed" recap or refers to created files in chat, every filename and path must be wrapped in backticks: write `` `CLAUDE.md` `` and `` `.claude/settings.json` ``, not bare `CLAUDE.md` or `.claude/settings.json`. Reason: Claude Code's chat renderer (and several other markdown renderers) auto-linkifies bare `name.ext` strings as if they were domain names — `CLAUDE.md` becomes a clickable `http://CLAUDE.md` link in the rendered output, which is broken and confusing for non-tech users. Backticks defuse the auto-linkifier. The same rule applies to file tables: wrap each filename cell in backticks.
 
