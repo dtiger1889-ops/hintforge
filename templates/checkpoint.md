@@ -35,6 +35,7 @@ player_position:
   reachable_zones: []        # computed from zone graph + current position; update at session end
   last_updated: YYYY-MM-DD
   confidence: unknown        # high=just told/witnessed · medium=last session · low=inferred · unknown=no data
+  # lookahead_n: 2           # uncomment + tune if persona Rule 2 fires too early (lower) or misses warnings (raise)
 ```
 
 ## Progress timeline

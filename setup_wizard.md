@@ -507,6 +507,7 @@ Capture `[RUN_P2]` and `[RUN_P3]`.
 - **Per-zone gate-lists** (one subsection per zone): ordered sequential gates (5–15 per zone, or 5–15 per branch for branching zones); entry / exit / outgoing edges referencing `architecture.md` by edge `(from, to)` pair; optional branches, common confusions, soft-lock warnings, sources. Nav-only — puzzles and enemies referenced by name as pointers, not solved inline.
 - **Support topology augmentation** for `architecture.md`: save stations per zone with in-zone location descriptions; fast-travel network nodes; hub access points.
 - **Locks-and-keys table** for `architecture.md`: every item-keyed gate — lock location (zone + description), key required, key source zone, whether lock is visible before key, notes.
+- **Localization toolkit** for `nav/localization.md` — **only when P1's `localization-mechanism class` is `landmark` or `hybrid`; skip for `map-system` and `none`.** Per zone: 3–6 distinctive in-game landmarks (statues, signage, equipment, environmental hazards, named save-points) that uniquely resolve to that zone, with disambiguation notes for landmarks that look similar across zones. Plus a short list of game-appropriate ask-the-player prompts for when CHECKPOINT's `player_position.confidence` drops below `high` ("what's the last big landmark you remember?", "which save-point did you last use?", etc.). For `hybrid` games, also list map-element prompts ("what region does your map show?") for zones that have map coverage.
 
 Drop zone: `<game>/research_inbox/p2/`. Ingest P1 before P2 — P1 creates the `architecture.md` scaffold that P2 extends.
 
@@ -545,6 +546,8 @@ Drop zone: `<game>/research_inbox/p3/`.
   | `missable` | primary-vector destination + index entry in `sections/<area>.md` |
 
   For `nav` and `structure` facts: if `nav/` doesn't exist, create it (stub `index.md` + scaffold `architecture.md` from templates). Set `status: research-integrated` on each newly written file. After writing all per-zone files, run a consistency pass: every edge declared in a zone file must appear in `architecture.md`'s edge table, and vice versa. Drift between them is a bug.
+
+  For `landmark` and `hybrid` localization-mechanism classes: also write the P2 brief's localization-toolkit output to `nav/localization.md` (create from `templates/localization.md` if absent). Skip for `map-system` and `none`-class games.
 
   For all other vectors: preserve tabular structure; don't flatten tables to prose.
 - Tag each new section with the inline metadata line `_source: <tool> <date> · confidence: <high|medium|low> · enemy-tier: <N> · puzzle-tier: <N> · category: mainline · spoiler: <tier>_`. Confidence: `high` if the source named a verifiable fact, `medium` if the value might vary by patch (item weights, exact damage numbers), `low` if it's an inference. `enemy-tier` and `puzzle-tier` come from the classification pass, not the user's current settings — that way display-time filtering can compare user's *current* tier against the *content's* tier and gate accordingly. Default `category` is `mainline`; use `easter-egg` for hidden / side-objective content and `lore` for worldbuilding (hidden until the reader opts in).
