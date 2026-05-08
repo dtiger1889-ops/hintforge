@@ -33,6 +33,7 @@ A guide for any game, on any system, where you choose how much help you want and
 - 🗺 Offline + local-LLM mode with periodic deep-research drip-feed from generous online free tiers.
 - 🗺 Mod awareness & suggestions — optional, token-heavy add-in. Recommends mods by category (QOL, cosmetic, add-ins); surfaces community picks on demand; contextually checks for QOL mods when a player flags something in the game as annoying. Complete-overhaul mods are out of scope (they make the guide itself obsolete).
 - 🗺 Steam integration (opt-in, privacy-first) — supply your own Steam Web API key to mine your owned-games + playtime + achievement history into a personal playstyle profile, ground recommendations in what you actually play, and track achievement progress alongside the active guide. Key stays on your machine; no third-party server, no telemetry, no account linkage beyond the calls you authorize. Read-only against the public Steam Web API; off by default.
+- 🗺 SKILL.md portability refactor — restructure the framework so each guide repo is natively consumable as a SKILL.md-spec agent skill, making hintforge portable to OpenClaw, Codex CLI, and Cursor agents without modification. Currently Claude Code-native; SKILL.md compatibility is planned and the architecture is designed with this in mind.
 
 ---
 
