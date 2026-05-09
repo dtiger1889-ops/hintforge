@@ -61,6 +61,22 @@ For serious / safety-relevant questions outside the game (real-world tech issues
 
 ---
 
+## Navigation runtime rules (when `nav/architecture.md` exists)
+
+When the guide carries a `nav/` folder with `architecture.md` and per-zone files, five rules apply on top of everything else. They use the zone graph in `architecture.md` and the `player_position` block in `CHECKPOINT.md` to ground answers in the player's actual location. If `nav/architecture.md` is absent, skip this section — the guide doesn't track location structurally.
+
+- **Rule 1 — Routing.** Nav-class questions ("where do I go?", "how do I get to X?", "I'm stuck") consult `nav/<current-zone>.md` first. Resolve `current_zone` from `CHECKPOINT.md`'s `player_position` block. If `confidence < high`, ask the localization-toolkit question (`nav/localization.md`, if present) before answering. If the per-zone file is a scaffold, web-search before asking a clarifying question; flag the gap to the user.
+- **Rule 2 — Lookahead warnings.** At session start and after each `player_position` update, walk the zone graph forward **N=2 gates** from `last_known_gate`. If any gate or outgoing edge in that window carries `point_of_no_return: permanent | chapter-bound | missable-trigger`, surface the warning before answering the player's actual question. Respect tier dials — combat-tier 0 wants minimal proactive warnings; higher tiers want more lead time. N is tunable per game in `CHECKPOINT.md` if the default fires too early or too late.
+- **Rule 3 — Backtrack queries.** "Can I still get back to X?" computes from the zone graph: does an edge exist from `current_zone` to X with `direction: bidirectional` or `type: fast-travel | hub-spoke`? Answer accordingly. Don't spoil *why* the path is closed if the answer is just "yes."
+- **Rule 4 — Reachability check.** When the player asks about content (an item, a quest, a zone), check whether it's currently reachable via the zone graph. If not currently reachable but will be: say so without spoiling when or why. If permanently unreachable: say so plainly — the player needs to know if a missable was missed.
+- **Rule 5 — Locks-and-keys notifications.** When the player picks up a key item, check the locks-and-keys table in `architecture.md` for `lock_visible_before_key: yes` entries where the player has already passed the lock. Surface unlock notifications, dial-respecting. Default: one summary notification with a count ("the key you just got opens N locks you've seen — want details?"), drill-down on request.
+
+For map-system games where `nav/architecture.md` is absent, Rule 1 falls back to web-search; Rules 2–5 apply only if a zone graph exists later, and degrade gracefully if not.
+
+**Updating `player_position`.** When the player gives position info ("I just entered <zone>", "I'm at <landmark>"), update `CHECKPOINT.md`'s `player_position` block immediately — `current_zone`, `last_known_gate`, `last_updated`, and `confidence: high`. Persona-inferred updates (deduced from indirect evidence) default to `confidence: medium`. Stale `player_position` defeats Rules 2–5; treat updating it as part of the conversational turn, not a session-end ritual.
+
+---
+
 ## When TTS is on (read-aloud mode)
 
 If the TTS module is installed in this guide (look for `<game>/.claude/tts_hook.ps1`) and `/voice` hasn't disabled it (no `<game>/.claude/tts_disabled.flag`), assistant replies are spoken aloud through Microsoft neural voices. Two voice-output constraints kick in:

@@ -21,7 +21,7 @@ Pick whichever reads better for the context.
 ### Inline (lightweight, for prose-flowing facts)
 
 > The hidden chest in the riverside cottage sits behind the false wall, not in the cellar.
-> _source: comrade-7 live observation 2026-03-12 · confidence: high · enemy-tier: 0 · puzzle-tier: 0 · category: mainline · conflicts: community-wiki page_
+> _source: comrade-7 live observation 2026-03-12 · confidence: high · enemy-tier: 0 · puzzle-tier: 0 · category: mainline · spoiler: none · conflicts: community-wiki page_
 
 The metadata line is italicized and starts with `_source:` — easy to scan, doesn't break prose flow.
 
@@ -50,6 +50,12 @@ The metadata line is italicized and starts with `_source:` — easy to scan, doe
 - **enemy-tier** — `0`–`5`. Minimum enemy-spoiler warning tier (from `warning_tiers.md`) the reader must be at to see this claim. `0` = no enemy info revealed. Higher tiers gate enemy abilities, boss mechanics, late-game roster, etc.
 - **puzzle-tier** — `0`–`3`. Minimum puzzle-spoiler tier the reader must be at. `0` = no puzzle solution revealed (location-only is fine). Higher tiers gate hints, partial solutions, and full answers to puzzles / codes / sequences.
 - **category** — `mainline` | `easter-egg` | `lore`. Defaults to `mainline` if omitted. See "Category and lore opt-in" below.
+- **spoiler** — `none` | `progression` | `late-game` | `story` | `dlc:<name>`. Optional but recommended for any claim originating from a research cascade pass — the cascade's spoiler-classification sub-agent assigns this tag at ingestion time (see `setup_wizard.md` Step 8 ingestion procedure). The display-time renderer can re-filter against the reader's current dials without re-running research. Tier mapping (the ingestion sub-agent applies this to derive `enemy-tier` / `puzzle-tier`):
+  - `none` → tier 0 (mechanics, item names, location names visible from start)
+  - `progression` → tier 1 (gated behind early-mid game milestones)
+  - `late-game` → tier 2 (boss-room contents, late mechanics, faction-reveal-dependent)
+  - `story` → tier 3 (narrative beats, character fates, ending branches)
+  - `dlc:<name>` → tier-of-dlc-content + DLC flag (gated independently)
 - **conflicts-with** — other claims this contradicts. If the aggregator sees a conflict, it picks the higher-weighted side and surfaces the alternative.
 
 ### Category and lore opt-in

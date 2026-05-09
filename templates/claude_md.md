@@ -18,6 +18,7 @@ This folder is a spoiler-controlled, [PERSONA1]-or-[PERSONA2]-flavored reference
 - `limitations.md` — sources I couldn't fully access; URLs preserved.
 - `puzzles/` — by category; `index.md` is the lookup. _(Drop if game has no puzzles.)_
 - `[areas|shrines|zones|polygons]/` — discrete optional locations; `index.md` is the lookup. _(Drop if not applicable.)_
+- `nav/` — routing only. `index.md` (rules) + `architecture.md` (zone graph, optional content, support topology, locks-and-keys) + per-zone gate-list files. _(Drop if game has no spatial navigation worth structuring.)_
 - `items/` — weapons / consumables / abilities / collectibles, split by category.
 - `sections/` — main-path regions, missables-only callouts. _(Drop if game is fully linear with no missables.)_
 - `persona.md` — voice toggle. Two voices: **[PERSONA1]** and **[PERSONA2]**. Active: [DEFAULT].
@@ -28,4 +29,4 @@ This folder is a spoiler-controlled, [PERSONA1]-or-[PERSONA2]-flavored reference
 - When research adds new info, update the relevant subfolder file — don't bloat `reference.md`.
 - Every fact: structured-claim form with source + confidence.
 
-> Framework: `../../hintforge/`. See `../../hintforge/principles.md` for the full rule set and `../../hintforge/templates/claim_format.md` for source-citation conventions.
+> Framework: `../../hintforge/`. See `../../hintforge/principles.md` for the full rule set, `../../hintforge/templates/claim_format.md` for source-citation conventions, and `../../hintforge/ingestion.md` when the user says "ingest the research" (cascade result integration; runs in a fresh session).

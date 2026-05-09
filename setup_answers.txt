@@ -103,6 +103,15 @@ ptt_hotkey = CapsLock
 tts = skip
 
 
+# === Stage 0 pre-research (Step 6.7) ===
+# 1–3 message web search before subfolder shape (Step 7) so Claude can
+# suggest specific content categories instead of asking you to guess.
+# Cost is small; default is yes. Skip only if you want zero cost up-front.
+# Options: yes / skip
+
+stage0 = yes
+
+
 # === Research mode (Step 8) ===
 # How much of the game should Claude research up-front vs. as you ask?
 # Options:

@@ -29,19 +29,62 @@ Each file: location/access (no spoilers about *getting* there), rewards (with co
 
 Use when the game has reusable, content-dense optional zones worth indexing separately from the main path.
 
+### `nav/`
+
+Use when the game has spatial navigation worth structuring: dungeon-crawlers, hub-and-spoke games, open worlds with discrete zones, or any game where "where do I go?" is a frequent in-play question. Skip for `narrative-no-nav` games (Tetris-like, pure visual novels, games with no meaningful spatial orientation).
+
+Structure:
+- `index.md` — routing rules and how the persona uses this folder. Universal nav discipline (no left/right directional language; flag the game's save / checkpoint mechanism on zone entry; 3-tip format for entry hints). Start from `templates/nav_index.md`.
+- `architecture.md` — **required when nav/ exists.** Zone graph (nodes + typed edges), chapter ↔ zone mapping, optional content registry, support topology (save / checkpoint locations, fast-travel network, hub access), locks-and-keys table. This is the structural backbone for all cross-zone reasoning. Start from `templates/architecture.md`; populate via P1 and P2 research ingestion.
+- `localization.md` — **required for `landmark` and `hybrid` localization-mechanism classes.** Start from `templates/localization.md`. Short reference: which in-game landmarks resolve to which zone-ids, what to ask the player when CHECKPOINT's `player_position` confidence drops below `high`. Populated during P2 research ingestion. Skip for `map-system` and `none`-class games where named regions or in-game maps are sufficient.
+- One file per navigable zone (`<zone-id>.md`) — sequential gate list, entry/exit references to `architecture.md` by edge ID, optional branches, common confusions, sources. Start from `templates/nav_zone.md`; files created at P2 ingestion time, not during initial setup.
+
+**Zone file naming:** use the canonical zone-id from `architecture.md` (e.g. `<zone-id>.md`). One file per zone — not one per chapter. Game-specific zone names (whatever the game itself calls its dungeons / regions / chambers) are encouraged.
+
+**When "Navigation routing" is selected in Step 7:** create `nav/index.md` stub (from `templates/nav_index.md`) and `nav/architecture.md` scaffold (from `templates/architecture.md`) immediately. Per-zone files (`nav/<zone>.md`) populate during P2 research ingestion.
+
+**Do not create nav/ if:** game-type-label is `narrative-no-nav`, or the game has a rich in-game map system (`map-system` class with `localization-mechanism class: none`) and nav questions are rare enough that per-question web-search covers them adequately.
+
+#### Vector tag taxonomy (used during research ingestion)
+
+Research output (P1 / P2 / P3) carries per-fact `vector:` tags so the integrator can route facts to the correct destination file. Twelve tags:
+
+- `nav` — gate / zone-traversal facts → `nav/<zone>.md`
+- `puzzle` — puzzle solutions, mechanics, reset behavior → `puzzles/<puzzle_name>.md`
+- `item` — weapons, consumables, key items, blueprints → `items/<category>.md`
+- `boss` — boss strategies, weaknesses, arena layout → per-game mapping
+- `enemy` — non-boss enemy patterns, weaknesses → `reference.md` or `warning_tiers.md`
+- `lore` — story beats, character arcs, world-building → `sections/<area>.md`
+- `controls` — keybindings, control remaps, input device strategies → `controls.md`
+- `settings` — graphics, audio, accessibility, difficulty options → `settings.md`
+- `build` — loadout strategies, weapon/ability combinations, progression paths → `items/builds.md` (or merge into `items/abilities.md` when ability-focused)
+- `structure` — zone-graph edges, optional content registry entries, support topology, locks-and-keys → `nav/architecture.md`
+- `missable` — overlay tag (combine as `vector: item, missable: yes`) → primary-vector destination + index entry in `sections/<area>.md`
+- `mechanic` — **fallback** for game-system mechanics not specific to one of the above (combat verbs, economy rules, save behavior, NG+) → `reference.md` or `meta_explainer.md`. Use only when no more-specific vector applies; do not absorb `controls` / `settings` / `build` content into this bucket.
+
+The integration step's job is route-and-distribute by tag. One brief writes to ~5 destination files. See `setup_wizard.md` Step 8 ingestion procedure for the routing table.
+
 ### `items/`
-Universal — every game has things the player carries. Suggested split (adjust to genre):
+Most games have things the player carries — but the **specific split is driven by Stage 0 pre-research output, not by template default**. The pre-research step (`setup_wizard.md` Step 6.7) produces a content-categories inventory marking each of the following present / absent / uncertain. Create only the files Stage 0 marked present:
 
 - `weapons.md`
 - `consumables.md` (heals, buffs, throwables)
 - `abilities.md` (skills, spells, glove-style mechanics)
 - `upgrades.md` (skill trees, talents, neuromods)
 - `materials.md` (crafting components)
+- `cartridges.md` / `ammo.md` (per-weapon ammunition types when meaningfully distinct)
+- `support_items.md` (utility items, traps, deployables)
+- `builds.md` (recommended loadouts / playstyle combinations — `vector: build`)
 - `collectibles.md` (audio logs, lore items, missables)
 
 Per item: synonyms (top), description, source(s) where to get it, hint ladder if puzzle-locked.
 
 For RPG-heavy games consider also: `armor.md`, `enchantments.md`, `mounts.md`, etc. Genre-driven.
+
+**Do not pre-create empty stubs for absent categories.** Stage 0's "absent — N/A" answer means the file is not created at setup. If the category is later proven present mid-playthrough, promote it from `_overflow/` (see below).
+
+### `_overflow/`
+Staging area for content that doesn't have a permanent home yet — per the lazy-classification model. Created as part of the minimal scaffold regardless of Stage 0 results. When the player asks twice about a content type that has no folder yet, write the claim here and surface a promotion prompt: *"You've asked about X twice now — should I create an `X/` folder and move these claims there?"*. This honestly acknowledges that classification at setup time is always incomplete; classification emerges from actual usage patterns.
 
 ### `sections/`
 Main-path regions. **Missables-only by default — no story.**
@@ -54,10 +97,14 @@ Skip if the game is fully linear with no missables (rare).
 
 - `CLAUDE.md` — folder rules (≤30 lines hard cap)
 - `CHECKPOINT.md` — playthrough state (≤80 lines)
+- `controls.md` — **universal** (every game has input). Keybindings + control remaps (PC keyboard/mouse, controller, accessibility rebinds), with a "common remaps players make" section sourced from Stage 0.
+- `settings.md` — **standard for any PC/console game with a settings menu** (i.e. nearly all). Graphics / audio / accessibility settings that meaningfully affect difficulty or perception (motion blur, FOV, HDR, colorblind mode, subtitles, controller deadzones).
 - `reference.md` — stable build/mechanics info that doesn't fit a category
 - `persona.md` — voice toggle
 - `warning_tiers.md` — tier flags
 - `limitations.md` — blocked sources
+
+**`controls.md` and `settings.md` are created by the wizard at instantiation, not deferred to research.** Stage 0 pre-research seeds initial content; per-question lookups fill gaps during play.
 
 ## Optional add-ons
 

@@ -32,16 +32,28 @@ If `Guides/` doesn't exist yet, create it first.
 
 Read line 2 of `hintforge/CLAUDE.md` (the framework's own version stamp, e.g. `<!-- v14 — 2026-05-02 -->`). Extract the `v<N>` token and substitute that string into `[HINTFORGE_VERSION]` on line 3 of the new guide's `CLAUDE.md`. The breadcrumb is set once at instantiation and stays fixed across future framework version bumps — it records *which version this guide was forged from*, not what's current. If the framework's version line is missing or malformed, stamp `v?` and note the discrepancy in the new guide's CHECKPOINT so it can be backfilled later.
 
-## Step 3 — Decide subfolder shape
+## Step 3 — Initialize subfolder scaffold
 
-Game-specific. From `templates/folder_structure.md`:
+The structure is **initialized**, not finalized — it refines during play via collision-based promotion (see below). From `templates/folder_structure.md`:
 
-- **puzzles/** — if the game has discrete logic / environmental puzzles
-- **areas/** (or genre-appropriate name: _shrines/_, _dungeons/_, _zones/_, _polygons/_) — discrete optional locations
-- **items/** — weapons / consumables / abilities / collectibles, split by category
+**Minimal scaffold (always create):**
+- **items/** — even when no `items/<category>.md` files are created yet
 - **sections/** — main-path regions, missables-only callouts (no story)
+- **_overflow/** — staging area for content that doesn't fit existing folders yet
+- **controls.md** at game-folder root — universal; every game has input
+- **settings.md** at game-folder root — universal for any PC/console game with a settings menu
 
-Drop folders the game doesn't need. Add ones it does.
+**Conditional folders (create only when the game actually has the content category):**
+- **puzzles/** — if the game has discrete logic / environmental puzzles
+- **nav/** — if the game has zone-traversal worth structuring (skip for `narrative-no-nav` and `map-system`-class games where in-game navigation is sufficient)
+- **areas/** (or genre-appropriate name: _shrines/_, _dungeons/_, _zones/_, _polygons/_) — discrete optional locations
+- **items/<category>.md** — `weapons.md`, `abilities.md`, `upgrades.md`, `consumables.md`, etc., per the game's actual content categories. Don't create empty stubs for categories the game doesn't have.
+
+When in doubt, omit the conditional folder and let it emerge during play.
+
+### Collision-based folder promotion
+
+When the player asks twice about a content type that doesn't have a folder yet, write the claim to `_overflow/` and surface a promotion prompt: *"You've asked about X twice — should I create an `X/` folder and move these claims there?"*. Classification emerges from actual usage rather than upfront speculation. Folder reorganization is safe because semantics live in claim metadata (`category`, `enemy-tier`, `puzzle-tier`), not in folder location — moving claims between folders doesn't corrupt anything downstream.
 
 ## Step 4 — Add the project to the workspace ledger
 
@@ -77,6 +89,19 @@ Future flow — see `distribution.md` for the design. Until built:
 - Sharing happens by handing the folder to another player
 
 When the publishing wrapper ships, this section gets filled in with: GitHub repo creation, CI for claim-format validation, contributor onboarding, etc.
+
+## Regeneration discipline — what survives a wipe-and-regen
+
+A guide may eventually be wiped and regenerated from a refreshed cascade pass (new framework version, revised research, scrap-and-rebuild after structural drift). When that happens, the following survive — never auto-overwritten by regeneration:
+
+1. **`CHECKPOINT.md`** — per-game state. Includes the `player_position` block when present. Survival is unconditional; a regeneration that touches CHECKPOINT.md is a bug.
+2. **Loadouts** — the user's actually-played-with weapon trees, build choices, ability picks, spec selections. Wherever they live in the game folder (`reference.md`, a dedicated `loadouts.md`, etc.).
+3. **Live-observed truths** the user has explicitly flagged as authoritative — in-game text the user transcribed, post-game-state routes the user discovered, save-station locations the user verified. Higher fidelity than research; supersedes research output on conflict (per the integration discipline at the bottom of `setup_wizard.md` Step 8).
+4. **Infrastructure** — `.claude/` settings + hooks, push-to-talk / TTS module installs, save-watcher scripts, `persona.md` if it carries customization beyond the template defaults.
+
+Everything else — scaffold files, single-research-run integrations, generic content distributed by the ingestion pass — is wiped and regenerated. Per-game preservation lists (the concrete file inventory for a specific game) are separate per-guide artifacts, drafted alongside the guide.
+
+This rule exists because regeneration is a real workflow (atomic_heart scrap-and-rebuild precedent), not a hypothetical. Without a checked-in preservation list, every regen has to re-derive what to keep.
 
 ## After instantiation: feedback loop
 

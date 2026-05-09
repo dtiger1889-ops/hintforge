@@ -78,6 +78,8 @@ If you have access to a deep-research tool — Claude's built-in Research, Gemin
 
 Round-trip: Claude writes a brief to `<game>/research_brief.txt` → you paste it into the external tool → save the result file into `<game>/research_inbox/` → in a fresh Claude session say `ingest the research` and Claude distributes it into the guide's subfolders with source-tagged metadata. Step-by-step instructions for the file-drop are in [`OPEN ME if new to AI - How to prompt claude code.txt`](./OPEN%20ME%20if%20new%20to%20AI%20-%20How%20to%20prompt%20claude%20code.txt).
 
+**Shortcut for claude.ai users:** if your plan supports Research mode + the Filesystem connector, paste the brief into a Research-mode chat with Filesystem enabled and tell it the absolute path to `<game>/research_inbox/p1/`. Claude can write the result file directly into the inbox folder — no manual copy/save step. Add `"don't summarize, only put it in the brief file"` to keep the chat clean while the artifact lands on disk. Then open a fresh Claude Code session at `<game>/` and say `ingest the research`.
+
 ### The pastable prompt
 
 In Claude Desktop, paste the message between the lines below. Replace `[GAME]` (in two places) with the name of the game.

@@ -26,6 +26,18 @@ Spoiler-controlled playthrough on [PLATFORM]. Cowork acts as live reference for 
 - **Stored:** [...]
 - **Loadout / build:** [...]
 
+## Player position (omit if `localization-mechanism class` in `nav/architecture.md` is `none` — e.g., procedural roguelikes with abstract level structure, narrative-only games, puzzle games. This file survives any wipe-and-regen of the guide; never auto-overwritten.)
+
+```yaml
+player_position:
+  current_zone: unknown      # zone-id from nav/architecture.md; "unknown" until first session
+  last_known_gate: unknown   # gate name from nav/<zone>.md sequential gates list
+  reachable_zones: []        # computed from zone graph + current position; update at session end
+  last_updated: YYYY-MM-DD
+  confidence: unknown        # high=just told/witnessed · medium=last session · low=inferred · unknown=no data
+  # lookahead_n: 2           # uncomment + tune if persona Rule 2 fires too early (lower) or misses warnings (raise)
+```
+
 ## Progress timeline
 - [x] [Major milestone reached]
 - [x] [Next major milestone reached]
