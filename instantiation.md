@@ -32,16 +32,28 @@ If `Guides/` doesn't exist yet, create it first.
 
 Read line 2 of `hintforge/CLAUDE.md` (the framework's own version stamp, e.g. `<!-- v14 — 2026-05-02 -->`). Extract the `v<N>` token and substitute that string into `[HINTFORGE_VERSION]` on line 3 of the new guide's `CLAUDE.md`. The breadcrumb is set once at instantiation and stays fixed across future framework version bumps — it records *which version this guide was forged from*, not what's current. If the framework's version line is missing or malformed, stamp `v?` and note the discrepancy in the new guide's CHECKPOINT so it can be backfilled later.
 
-## Step 3 — Decide subfolder shape
+## Step 3 — Initialize subfolder scaffold
 
-Game-specific. From `templates/folder_structure.md`:
+The structure is **initialized**, not finalized — it refines during play via collision-based promotion (see below). From `templates/folder_structure.md`:
 
-- **puzzles/** — if the game has discrete logic / environmental puzzles
-- **areas/** (or genre-appropriate name: _shrines/_, _dungeons/_, _zones/_, _polygons/_) — discrete optional locations
-- **items/** — weapons / consumables / abilities / collectibles, split by category
+**Minimal scaffold (always create):**
+- **items/** — even when no `items/<category>.md` files are created yet
 - **sections/** — main-path regions, missables-only callouts (no story)
+- **_overflow/** — staging area for content that doesn't fit existing folders yet
+- **controls.md** at game-folder root — universal; every game has input
+- **settings.md** at game-folder root — universal for any PC/console game with a settings menu
 
-Drop folders the game doesn't need. Add ones it does.
+**Conditional folders (create only when the game actually has the content category):**
+- **puzzles/** — if the game has discrete logic / environmental puzzles
+- **nav/** — if the game has zone-traversal worth structuring (skip for `narrative-no-nav` and `map-system`-class games where in-game navigation is sufficient)
+- **areas/** (or genre-appropriate name: _shrines/_, _dungeons/_, _zones/_, _polygons/_) — discrete optional locations
+- **items/<category>.md** — `weapons.md`, `abilities.md`, `upgrades.md`, `consumables.md`, etc., per the game's actual content categories. Don't create empty stubs for categories the game doesn't have.
+
+When in doubt, omit the conditional folder and let it emerge during play.
+
+### Collision-based folder promotion
+
+When the player asks twice about a content type that doesn't have a folder yet, write the claim to `_overflow/` and surface a promotion prompt: *"You've asked about X twice — should I create an `X/` folder and move these claims there?"*. Classification emerges from actual usage rather than upfront speculation. Folder reorganization is safe because semantics live in claim metadata (`category`, `enemy-tier`, `puzzle-tier`), not in folder location — moving claims between folders doesn't corrupt anything downstream.
 
 ## Step 4 — Add the project to the workspace ledger
 

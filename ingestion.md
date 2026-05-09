@@ -2,6 +2,10 @@
 
 This procedure runs in a **fresh session, separate from setup**, when research result files (P1 / P2 / P3 from the cascade in [`setup_wizard.md`](setup_wizard.md) Step 8) are ready to integrate into a game guide. Triggered by the user typing "ingest the research" or attaching a result file directly.
 
+> ⚠️ **Spoiler heads-up — read before triggering ingestion.** Ingestion produces large LLM-visible output: the model prints fact text, file contents, table rows, and tier-tagged claims as it writes them. The *guide files* respect spoiler tiers via gating, but the *ingestion process* does not — anything in the result file (boss names, late-game mechanics, missable timings, character fates) will scroll past in the terminal. There is no clean fix for this — it's a structural property of running an LLM over spoiler-rich content. If you're spoiler-averse and haven't played the game yet, **shrink the terminal window to a sliver** — wide enough to see the status line ("Incubating… Nm Ns") so you know when it finishes, narrow/short enough that fact text is clipped off.
+
+> 🧠 **Run ingestion on a mid-tier model with extended thinking OFF.** Ingestion is structural: read result, validate spoiler tags, route facts to files by vector, update CHECKPOINT, refresh downstream briefs. None of those steps benefit from extended-thinking reasoning chains. If `[RESEARCH_MODE]` is `handoff`, the deep reasoning has already been externalized to the deep-research tool that produced the result file — paying for thinking locally too is double-billing. Top-tier models (Opus-class) are also overkill; mid-tier (Sonnet-class) handles the work. Verify before triggering: most CLIs surface the model name and "thinking" status in their model picker or status line.
+
 > **Why this is its own file.** Ingestion is the largest single context load this guide will see. Loading the full setup wizard alongside the result file wastes context on first-run setup steps (environment check, player name, tier dials, persona research, TTS/PTT, subfolder shape) that ingestion doesn't care about. This file carries only what the ingestion session needs.
 
 ## Pre-flight
@@ -48,8 +52,11 @@ Do not overwrite existing content; append or create per-file.
 | `boss` | per-game mapping (optional-zone boss → discrete-zone file; main-story boss → `sections/<area>.md`) |
 | `enemy` | `reference.md` or `warning_tiers.md` |
 | `lore` | `sections/<area>.md` |
-| `mechanic` | `reference.md` or `meta_explainer.md` |
+| `controls` | `controls.md` (game-folder root) — create if absent |
+| `settings` | `settings.md` (game-folder root) — create if absent |
+| `build` | `items/builds.md` — create if absent; or merge into existing `items/<category>.md` (e.g. `items/abilities.md`) when the build is ability-focused |
 | `missable` | primary-vector destination + index entry in `sections/<area>.md` |
+| `mechanic` | `reference.md` or `meta_explainer.md` (true fallback — only when no more-specific vector applies) |
 
 **For `nav` and `structure` facts:** if `nav/` doesn't exist, create it (stub `index.md` + scaffold `architecture.md` from templates). Set `status: research-integrated` on each newly written file. After writing all per-zone files, run a consistency pass: every edge declared in a zone file must appear in `architecture.md`'s edge table, and vice versa. Drift between them is a bug.
 
@@ -76,13 +83,24 @@ Do not overwrite existing content; append or create per-file.
 - `Research preferences: cascade-handoff (P1 ingested YYYY-MM-DD from <source-tool>; P2: ingested/pending/skipped; P3: ingested/pending/skipped)`
 - Add a `## Harness changelog` entry: which phase was ingested, which subfolders received content, approximate token count, any caveats.
 
-### 8. Move the ingested file aside
+### 8. Refresh downstream briefs (mandatory)
+
+After CHECKPOINT is updated and before the file is moved aside, re-read every `<game>/research_briefs/p<N>.txt` for N greater than the just-ingested phase. For each one:
+
+1. **Hard-code now-established facts.** Anything the just-ingested phase confirmed (zone-id list, chapter ↔ zone mapping, content categories present, localization-mechanism class, NORA / save-station / fast-travel inventory) should be written into the downstream brief verbatim, not left as an open question.
+2. **Remove resolved hedges.** Any `if X is true` / `assuming the game has Y` / `confirm whether…` clause whose answer is now known gets deleted or rewritten as a stated fact.
+3. **Sharpen open questions.** Questions the downstream brief asked are now scoped against the established context — researchers should not be asked to re-derive what's already known.
+4. **Skip if no downstream brief exists** (e.g. P3 ingested without P2/P3 successors). Skip with a one-line note in the recap.
+
+This step exists because researchers receiving a stale downstream brief will redo upstream work and miss the actual gap. The cascade is only as good as the downstream-brief refresh between phases.
+
+### 9. Move the ingested file aside
 
 Move the ingested file out of `research_inbox/<phase>/` into `research_inbox/<phase>/_processed/` (create the subfolder if needed) so a future "ingest the research" run doesn't double-process it.
 
-### 9. Show the user a recap
+### 10. Show the user a recap
 
-One-screen summary: subfolders touched, sections added per subfolder, any `confidence: medium` flags, anything the brief asked for that the result didn't cover.
+One-screen summary: subfolders touched, sections added per subfolder, any `confidence: medium` flags, downstream briefs refreshed (with a one-line summary of changes per brief), anything the brief asked for that the result didn't cover.
 
 ## Integration discipline (applies across all phases)
 

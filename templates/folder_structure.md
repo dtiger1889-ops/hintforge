@@ -47,7 +47,7 @@ Structure:
 
 #### Vector tag taxonomy (used during research ingestion)
 
-Research output (P1 / P2 / P3) carries per-fact `vector:` tags so the integrator can route facts to the correct destination file. Nine tags:
+Research output (P1 / P2 / P3) carries per-fact `vector:` tags so the integrator can route facts to the correct destination file. Twelve tags:
 
 - `nav` — gate / zone-traversal facts → `nav/<zone>.md`
 - `puzzle` — puzzle solutions, mechanics, reset behavior → `puzzles/<puzzle_name>.md`
@@ -55,25 +55,36 @@ Research output (P1 / P2 / P3) carries per-fact `vector:` tags so the integrator
 - `boss` — boss strategies, weaknesses, arena layout → per-game mapping
 - `enemy` — non-boss enemy patterns, weaknesses → `reference.md` or `warning_tiers.md`
 - `lore` — story beats, character arcs, world-building → `sections/<area>.md`
-- `mechanic` — game-system mechanics not specific to one fact (combat verbs, economy rules, save behavior, NG+) → `reference.md` or `meta_explainer.md`
+- `controls` — keybindings, control remaps, input device strategies → `controls.md`
+- `settings` — graphics, audio, accessibility, difficulty options → `settings.md`
+- `build` — loadout strategies, weapon/ability combinations, progression paths → `items/builds.md` (or merge into `items/abilities.md` when ability-focused)
 - `structure` — zone-graph edges, optional content registry entries, support topology, locks-and-keys → `nav/architecture.md`
 - `missable` — overlay tag (combine as `vector: item, missable: yes`) → primary-vector destination + index entry in `sections/<area>.md`
+- `mechanic` — **fallback** for game-system mechanics not specific to one of the above (combat verbs, economy rules, save behavior, NG+) → `reference.md` or `meta_explainer.md`. Use only when no more-specific vector applies; do not absorb `controls` / `settings` / `build` content into this bucket.
 
 The integration step's job is route-and-distribute by tag. One brief writes to ~5 destination files. See `setup_wizard.md` Step 8 ingestion procedure for the routing table.
 
 ### `items/`
-Universal — every game has things the player carries. Suggested split (adjust to genre):
+Most games have things the player carries — but the **specific split is driven by Stage 0 pre-research output, not by template default**. The pre-research step (`setup_wizard.md` Step 6.7) produces a content-categories inventory marking each of the following present / absent / uncertain. Create only the files Stage 0 marked present:
 
 - `weapons.md`
 - `consumables.md` (heals, buffs, throwables)
 - `abilities.md` (skills, spells, glove-style mechanics)
 - `upgrades.md` (skill trees, talents, neuromods)
 - `materials.md` (crafting components)
+- `cartridges.md` / `ammo.md` (per-weapon ammunition types when meaningfully distinct)
+- `support_items.md` (utility items, traps, deployables)
+- `builds.md` (recommended loadouts / playstyle combinations — `vector: build`)
 - `collectibles.md` (audio logs, lore items, missables)
 
 Per item: synonyms (top), description, source(s) where to get it, hint ladder if puzzle-locked.
 
 For RPG-heavy games consider also: `armor.md`, `enchantments.md`, `mounts.md`, etc. Genre-driven.
+
+**Do not pre-create empty stubs for absent categories.** Stage 0's "absent — N/A" answer means the file is not created at setup. If the category is later proven present mid-playthrough, promote it from `_overflow/` (see below).
+
+### `_overflow/`
+Staging area for content that doesn't have a permanent home yet — per the lazy-classification model. Created as part of the minimal scaffold regardless of Stage 0 results. When the player asks twice about a content type that has no folder yet, write the claim here and surface a promotion prompt: *"You've asked about X twice now — should I create an `X/` folder and move these claims there?"*. This honestly acknowledges that classification at setup time is always incomplete; classification emerges from actual usage patterns.
 
 ### `sections/`
 Main-path regions. **Missables-only by default — no story.**
@@ -86,10 +97,14 @@ Skip if the game is fully linear with no missables (rare).
 
 - `CLAUDE.md` — folder rules (≤30 lines hard cap)
 - `CHECKPOINT.md` — playthrough state (≤80 lines)
+- `controls.md` — **universal** (every game has input). Keybindings + control remaps (PC keyboard/mouse, controller, accessibility rebinds), with a "common remaps players make" section sourced from Stage 0.
+- `settings.md` — **standard for any PC/console game with a settings menu** (i.e. nearly all). Graphics / audio / accessibility settings that meaningfully affect difficulty or perception (motion blur, FOV, HDR, colorblind mode, subtitles, controller deadzones).
 - `reference.md` — stable build/mechanics info that doesn't fit a category
 - `persona.md` — voice toggle
 - `warning_tiers.md` — tier flags
 - `limitations.md` — blocked sources
+
+**`controls.md` and `settings.md` are created by the wizard at instantiation, not deferred to research.** Stage 0 pre-research seeds initial content; per-question lookups fill gaps during play.
 
 ## Optional add-ons
 

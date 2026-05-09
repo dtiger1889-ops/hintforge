@@ -2,6 +2,8 @@
 
 Structured spec any markdown-aware AI agent executes when a user first instantiates hintforge for a new game. Not yet wrapped in an installer — a future installer milestone will ship the wrapper (Claude Code skill, Python CLI, or slash command).
 
+> 🧠 **Run the wizard on a mid-tier model with extended thinking OFF.** The wizard is structural: gather answers, write files from templates, generate research briefs from a fixed schema. None of the steps benefit from extended-thinking reasoning chains, and `[RESEARCH_MODE] = handoff` already externalizes the deep reasoning to whichever deep-research tool the user routes the brief through. Top-tier models (Opus-class) are overkill; mid-tier (Sonnet-class) handles the work. Verify before triggering: most CLIs surface the model name and "thinking" status in their model picker or status line.
+
 ## When the wizard runs
 
 Once per (user, game) pair — when a user adds a new game to their workspace. Not every session.
@@ -83,6 +85,7 @@ Before any other step, check whether the user has filled in `hintforge/setup_ans
 | `tts` | `[TTS_ENABLED]`, `[TTS_STYLE]` | 6 |
 | `ptt` | `[PTT_ENABLED]` | 6.5 |
 | `ptt_hotkey` | `[PTT_HOTKEY]` | 6.5 |
+| `stage0` | `[STAGE0]` | 6.7 |
 | `research` | `[RESEARCH_MODE]` | 8 |
 | `run_p2` | `[RUN_P2]` | 8 |
 | `run_p3` | `[RUN_P3]` | 8 |
@@ -119,11 +122,13 @@ After Step -1 reads pre-fills and Step 0 confirms environment, the wizard collec
 - Step 4 — `enemy_tier`, `puzzle_tier`
 - Step 6 — `tts`
 - Step 6.5 — `ptt`, `ptt_hotkey`
+- Step 6.7 — `stage0` (yes/skip)
 - Step 8 — `research`
 
 **Live-only steps (sequential, after the batched ask):**
 - Step 5 — persona research (when `personas = you pick`); needs bot reasoning between turns
-- Step 7 — subfolder shape; bot suggests based on game research, user confirms/edits
+- Step 6.7 — Stage 0 pre-research (when `stage0 = yes`); web search runs after the batched ask, output written to `stage0_priors.md` before Step 7
+- Step 7 — subfolder shape; bot pre-populates from Stage 0 priors, user confirms/edits
 - Step 9 — confirmation summary; always live, always one final yes/no
 - Step 10 — fresh-session handoff; verbatim closing message
 
@@ -357,22 +362,73 @@ This is the backbone (see `principles.md` Principle #1). Don't skip; don't defau
 
 **Default for the first-user test:** skipped.
 
+### Step 6.7 — Stage 0 pre-research (REQUIRED — runs before Step 7; ⚠️ token-aware)
+
+**Why this exists.** Asking the user to classify content categories (Step 7) without internet context creates a catch-22: classification needs research, research is shaped by classification. The result of skipping pre-research is that the P1 brief (later) inherits whatever the user happened to guess, and gameplay fundamentals — weapons, abilities, controls, settings — get under-covered because the brief never knew they existed in the form they take in this game. The Atomic Heart ingestion failure (P1 produced a 46-zone graph but only documented 3 of 12+ weapons; no controls.md, no settings.md, no abilities.md, no upgrades.md) is the failure this step prevents. See [`../hintforge_dev/lazy_classification_rfc.md`](../hintforge_dev/lazy_classification_rfc.md) for full rationale (dev-only, not shipped to users).
+
+**Cost.** 1–3 messages — one or two web queries (Wikipedia / IGDB / Steam description / one or two top guides), one summarization message. Announced before running; user can skip.
+
+**Ask:**
+- "Quick web search before I ask you about subfolders — costs ~1–3 messages and lets me suggest specific content categories instead of asking you to guess. (yes / **skip**)"
+
+**If skip:**
+- Record `[STAGE0] = skipped`. Step 7 falls back to the generic checklist with default subfolders. Continue.
+
+**If yes — procedure:**
+
+1. Run a web search on `[GAME_NAME]` (Wikipedia + Steam page + one community guide if available). Pull a description, genre tags, and any easily-visible content signals (weapon list length, ability tree presence, settings-menu coverage, control-rebind notoriety).
+
+2. Produce a **structural-priors block** with these required outputs:
+
+   - **Game-type signal:** one of `dungeon-linear` / `hub-and-spoke-with-dungeons` / `open-world-with-distinct-dungeons` / `open-world-explorative-only` / `procedural` / `on-rails` / `narrative-no-nav`. One-line rationale.
+   - **Localization-mechanism signal:** one of `map-system` / `landmark` / `hybrid` / `none`. One-line rationale.
+   - **Content categories inventory** — for each category below, mark `present` / `absent` / `uncertain` with a one-line source-citing rationale and (when present) a coverage estimate (rough item count or system complexity):
+     - `weapons` (and whether weapons split into meaningful subcategories — melee vs. ranged vs. magic, etc.)
+     - `cartridges` / `ammo` (only when ammo types are meaningfully distinct, not generic "bullets")
+     - `consumables` (heals, buffs, throwables)
+     - `crafting_materials`
+     - `abilities` (skills, spells, glove-style mechanics, talents)
+     - `upgrades` (skill trees, neuromods, perks, attribute progression)
+     - `support_items` (utility items, traps, deployables)
+     - `builds` / `loadouts` (whether the game supports meaningful build choice — multiple viable playstyles, weapon synergies, ability combinations)
+     - `controls` (note any signals that the game has a notorious control scheme, common remap recommendations, or accessibility-rebind community discussion) — **always present; the question is depth, not existence**
+     - `settings` (note any signals about graphics/audio/accessibility settings that affect difficulty perception — motion blur tolerance, FOV gating, HDR issues, colorblind mode quality, subtitle behavior) — **always present for any PC/console game**
+   - **Source-language signal:** dev-country language + top player-region languages (used to seed P1's non-English source floor).
+
+3. Write the structural-priors block to `<game>/research_briefs/stage0_priors.md` AND show it inline in chat. The user can edit this file before Step 7 — the file is the canonical input to Step 7's pre-population.
+
+**Capture:**
+- `[STAGE0]` — `done` / `skipped`
+- `[STAGE0_GAME_TYPE]` — game-type signal (or `unknown` if skipped)
+- `[STAGE0_LOC_CLASS]` — localization-mechanism signal (or `unknown`)
+- `[STAGE0_CATEGORIES]` — list of present categories (or `unknown`)
+
+**Why a separate file.** `stage0_priors.md` is the canonical artifact the P1 brief generator reads later (Step 8). Keeping it on disk means re-running Step 8 doesn't redo the web search, and the user can correct any wrong inferences before they propagate downstream.
+
+**Default for the first-user test:** yes (run it). The cost is small and it raises the floor on every downstream step.
+
 ### Step 7 — Subfolder shape (REQUIRED)
 
-**Ask** (with suggestions based on game research, if the AI agent did any):
-- "Which content categories does this game have? Check all that apply."
+**Pre-population from Stage 0 (REQUIRED when `[STAGE0] = done`):** read `<game>/research_briefs/stage0_priors.md` and pre-populate the subfolder checklist with the categories Stage 0 marked `present`. Frame the question as "here's what I found — confirm or correct" rather than "figure this out from scratch."
+
+**Ask** (with Stage 0's suggestions checked, when available):
+- "Based on the pre-research, this game has the following content categories. Confirm, edit, or skip and let it emerge during play."
   - [ ] Puzzles / logic challenges
   - [ ] Discrete optional zones (shrines / dungeons / testing grounds / similar)
   - [ ] Navigation routing (zone-based dungeon layout, points of no return, hub-and-spoke structure)
-  - [ ] Items, weapons, abilities
+  - [ ] Items split — weapons / abilities / upgrades / consumables / cartridges / materials / support / builds (per Stage 0; check those marked present)
   - [ ] Region-based main path with missable collectibles
   - [ ] Other (free-form)
 
 **Capture:**
-- Subfolder list to create. Default if user can't decide: `puzzles/`, `items/`, `sections/` (the most common three).
+- Subfolder list to create.
+- **Minimal scaffold (always created, regardless of answers):** `items/`, `sections/`, `_overflow/` plus `controls.md` and `settings.md` at game-folder root. `_overflow/` is the staging area for content that doesn't fit existing folders yet — see `templates/folder_structure.md` for the collision-based promotion pattern. `controls.md` and `settings.md` are universal because every game has input and (nearly every game) a settings menu.
+- **Stage-0-gated files:** `items/<category>.md` files are only created for categories Stage 0 marked `present` (weapons.md, abilities.md, upgrades.md, etc.). No empty stubs for absent categories.
+- **`puzzles/`** is created when Stage 0 marks puzzles present, or the user checks the box.
+- **`nav/`** creation rules: as below.
 - "Navigation routing" creates `nav/` with a stub `index.md` (from `templates/nav_index.md`) and a scaffold `nav/architecture.md` (from `templates/architecture.md`). Per-zone files (`nav/<zone>.md`) are created later during P2 research ingestion — not at setup.
 
-**Skip rule for nav/:** do NOT recommend or create `nav/` when the game's game-type label is `narrative-no-nav` (Tetris-likes, pure visual novels, games with no meaningful spatial orientation), or when the game uses a rich in-game map system (`localization-mechanism class: none`) and nav questions are rare enough that per-question web-search covers them. If `[RESEARCH_MODE]` is `handoff` or `deep`, the game-type label may not be known until P1 ingestion — in that case, defer the nav/ decision to ingestion: skip the `nav/` checkbox at setup, and let the ingestion step create `nav/` only if P1's Architecture Summary classifies the game as nav-bearing.
+**Skip rule for nav/:** do NOT recommend or create `nav/` when the game's game-type label is `narrative-no-nav` (Tetris-likes, pure visual novels, games with no meaningful spatial orientation), or when the game uses a rich in-game map system (`localization-mechanism class: none`) and nav questions are rare enough that per-question web-search covers them. If `[RESEARCH_MODE]` is `handoff` or `deep`, the game-type label may not be known until P1 ingestion — in that case, defer the nav/ decision to ingestion: skip the `nav/` checkbox at setup, and let the ingestion step create `nav/` only if P1's Architecture Summary classifies the game as nav-bearing. When `[STAGE0] = done`, prefer `[STAGE0_GAME_TYPE]` over deferring — Stage 0's signal is good enough to drive the nav/ decision at setup.
 
 ### Step 8 — Research preference (REQUIRED — token-aware; see Principle #13)
 
@@ -396,6 +452,10 @@ This is the backbone (see `principles.md` Principle #1). Don't skip; don't defau
 
 1. **Generate the brief.** After Step 9 file-writing completes, write a research prompt to `<game>/research_briefs/p1.txt` AND show it inline in chat. The brief is a one-page research request that works whether the reader is the user themselves, a third party they handed it to, or an external tool with no surrounding context.
 
+   **Stage 0 input (REQUIRED when `[STAGE0] = done`).** Before generating the brief, read `<game>/research_briefs/stage0_priors.md`. The brief MUST hard-code Stage 0's content-categories inventory into a "Content Categories — research these explicitly" section so the researcher does not have to discover what the game has from scratch. For each category Stage 0 marked `present`, the brief lists the category by name and asks for claim-format-ready coverage. For `uncertain` categories, the brief asks the researcher to confirm presence/absence as part of P1. For `absent` categories, the brief explicitly notes "absent — do not research" so the researcher does not waste budget. When `[STAGE0] = skipped`, the brief falls back to the generic taxonomy below and the researcher does the category discovery themselves; surface this trade-off to the user when generating the brief.
+
+   **Effort allocation guidance (REQUIRED in every brief).** Include a top-level note: "Architecture Summary (zone graph, chapters, etc.) should consume roughly 30% of token budget — not 60%+. The remaining budget covers gameplay fundamentals (weapons, abilities, controls, settings, builds) and per-chapter facts. A brief that returns a 50-zone graph with 3 documented weapons has failed the allocation check."
+
    **Required structure** (in this order):
 
    - **Game grounding** (1 line): exact game name, developer, year, platform, current patch version, base-game vs. DLC scope — so external tools don't conflate with sequels, remasters, or paid expansions.
@@ -412,8 +472,9 @@ This is the backbone (see `principles.md` Principle #1). Don't skip; don't defau
      - **DLC list** — with chapter / zone mappings
      - **Optional content registry** — cross-zone optional content with unlock conditions, access windows, parent zones, recommended chapter, failure modes (`missable` / `always-available` / `NG+-only`)
      - **Source-language set** — dev-country language + top-3 player-region languages (used to enforce the non-English source floor below)
+     - **Content categories inventory** — REQUIRED. For each of the categories below, mark `present` / `absent` / `uncertain` with a one-line rationale and (when present) a coverage estimate (item count or system complexity): `weapons`, `cartridges/ammo`, `consumables`, `crafting_materials`, `abilities`, `upgrades`, `support_items`, `builds`, `controls`, `settings`. When `[STAGE0] = done`, this section is hard-coded from `stage0_priors.md`; the researcher confirms / corrects rather than re-deriving. Categories marked `present` get dedicated coverage in the chapter-organized facts section; categories marked `absent` are explicitly skipped so budget isn't wasted.
 
-   - **Chapter-organized facts** (rest of the researcher's output; after Architecture Summary): per chapter — 1–2 lines of context, then facts as bullets. Each fact carries: `vector:` tag + `spoiler:` tag + per-fact source attribution. **Vector tag taxonomy:** `nav` (gate/area-traversal) · `puzzle` (solutions, mechanics) · `item` (weapons, consumables, key items) · `boss` (strategies, weaknesses) · `enemy` (non-boss patterns) · `lore` (story beats) · `mechanic` (game-system rules) · `structure` (zone-graph edges, optional content registry entries, support topology, locks-and-keys — integrator routes these to `nav/architecture.md`) · `missable` (secondary tag; combine as `vector: item, missable: yes`). Standing prompts on every chapter: What do mainstream English guides miss? What exceptions exist to apparent rules? Mechanism not inventory — *why* and *what triggers*, not just *what is here*.
+   - **Chapter-organized facts** (rest of the researcher's output; after Architecture Summary): per chapter — 1–2 lines of context, then facts as bullets. Each fact carries: `vector:` tag + `spoiler:` tag + per-fact source attribution. **Vector tag taxonomy** (twelve tags): `nav` (gate/area-traversal) · `puzzle` (solutions, mechanics) · `item` (weapons, consumables, key items) · `boss` (strategies, weaknesses) · `enemy` (non-boss patterns) · `lore` (story beats) · `controls` (keybindings, control remaps — routes to `controls.md`) · `settings` (graphics/audio/accessibility — routes to `settings.md`) · `build` (loadout strategies, weapon/ability combinations — routes to `items/builds.md`) · `structure` (zone-graph edges, optional content registry entries, support topology, locks-and-keys — integrator routes these to `nav/architecture.md`) · `missable` (overlay tag; combine as `vector: item, missable: yes`) · `mechanic` (FALLBACK only — game-system rules not specific to one of the above; do not absorb `controls`/`settings`/`build` into this bucket). Standing prompts on every chapter: (1) What do mainstream English guides miss? (2) What exceptions exist to apparent rules? (3) Mechanism not inventory — *why* and *what triggers*, not just *what is here*. (4) What tapes, documents, weapon schematics, or key items have a limited pickup window? Mark each `missable: yes` with the latest safe chapter. **(5) Builds: what recommended loadouts/playstyles do mainstream guides converge on, and where do they disagree? Cover at least one ability-focused, one weapon-focused, and one hybrid build when the game supports them. (6) Controls: what control remaps (PC keyboard/mouse and controller) are commonly recommended, and why? Include accessibility-rebind discussion when sources cover it. (7) Settings: which graphics/audio/accessibility settings meaningfully affect difficulty or perception? (Motion blur, FOV, HDR, colorblind mode, subtitle behavior, controller deadzones, etc.)**
 
    - **Source diversity floor** (per topic, not per brief):
      - **Minimum 5 independent sources** before any fact is marked confirmed.
@@ -557,6 +618,7 @@ About to set up:
   TTS style:        [TTS_STYLE]              (from setup_answers.txt)     ← Step 6 (or "n/a")
   PTT enabled:      [PTT_ENABLED]            (from setup_answers.txt)     ← Step 6.5
   PTT hotkey:       [PTT_HOTKEY]             (from setup_answers.txt)     ← Step 6.5 (or "n/a")
+  Stage 0 priors:   [STAGE0]                                              ← Step 6.7 ("done" / "skipped")
   Subfolders:       [list]                                                ← Step 7
   Research mode:    [RESEARCH_MODE]          (from setup_answers.txt)     ← Step 8
   Run P2:           [RUN_P2]                 (from setup_answers.txt)     ← Step 8 (n/a if research ≠ handoff/deep)
@@ -578,7 +640,10 @@ If yes, the AI agent:
    - `persona.md` → `<game>/persona.md` (or skip if persona = none)
    - `warning_tiers.md` → `<game>/warning_tiers.md` with the chosen tiers
    - `limitations.md` → `<game>/limitations.md`
-4. Creates the chosen subfolders (each with a stub `index.md`)
+4. Creates the minimal scaffold + chosen subfolders:
+   - **Always created:** `items/`, `sections/`, `_overflow/` (each with a stub `index.md`); `controls.md` and `settings.md` at game-folder root (seeded from Stage 0 priors when `[STAGE0] = done`, otherwise minimal stubs noting "populate via per-question lookup or research")
+   - **Stage-0-gated:** for each item category Stage 0 marked `present`, create `items/<category>.md` (e.g. `items/weapons.md`, `items/abilities.md`, `items/upgrades.md`). Skip absent categories — no empty stubs.
+   - **Other subfolders from Step 7:** `puzzles/`, `nav/`, game-specific `[areas]/` per the user's confirmed Step 7 selection
 5. If `[SAVE_DIR]` provided: scaffolds `<game>/save_watcher.py` from the documented pattern
 6. If TTS enabled and Windows: scaffolds `<game>/.claude/tts_hook.ps1`
 7. Adds the project to the workspace ledger (`<WORKSPACE_ROOT>/CLAUDE.md`)
