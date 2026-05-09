@@ -33,9 +33,15 @@ Read [`../hintforge/templates/claim_format.md`](templates/claim_format.md) to co
 Deep research is generated unfiltered; spoiler scoping happens here. Spawn a `general-purpose` Agent with the result file(s) plus the user's current `enemy_tier` and `puzzle_tier`. The sub-agent's job:
 
 1. Read every fact in the result. Validate or assign a per-fact `spoiler:` tag — `none` / `progression` / `late-game` / `story` / `dlc:<name>`. Untagged content is unsafe; the sub-agent must classify everything.
-2. For each fact, derive the metadata `enemy-tier` and `puzzle-tier` from its spoiler tag. `none` → tier 0; `progression` → 1; `late-game` → 2; `story` → 3; `dlc:<name>` → tier-of-dlc-content + dlc flag.
-3. Output a classified version of the result with each fact prefixed by its tags, preserving original wording verbatim. No omissions; high tiers get tagged for gated display, not deleted.
-4. Surface ambiguous calls in a short report — facts where the spoiler tier wasn't clear from context — for the main agent to confirm with the user before appending.
+2. **Combat content has three sub-vectors that classify differently — tag at the fact level, not the section level.** This split mirrors the tier rules in [`templates/warning_tiers.md`](templates/warning_tiers.md) Tier 0, which gates "Boss existence hidden" and "Permitted: post-encounter help on request" as separately enforced rules:
+    - **Tactics** (weakness, phase breakdown, weapon recommendation, missable-achievement preconditions): `progression` for mainline bosses, `late-game` for chapters past the global PoNR, `story` only for final-boss specifics tied to a narrative reveal. Persona delivers post-encounter on request.
+    - **Lore / cutscene** (who the boss is, narrative role, character relationships): `story`, regardless of where in the game it appears. Persona delivers only on explicit opt-in.
+    - **Existence** (the fact a boss appears in zone X): `progression`. The persona enforces "Boss existence hidden" from `warning_tiers.md` Tier 0 at read-time — the integrator still writes the fact into the destination file (zone files, architecture's locks-and-keys table, encounter index) so the persona has it when the player encounters the boss and asks for help.
+
+    Common error: collapsing all three into `story` because a cutscene sits next to a fight in the result. A research line like "Belyash appears in a Theatre cutscene revealing X, weak to flamethrower-from-side-angle" carries lore (`story`), existence (`progression`, gated by Tier 0 at read-time), and tactics (`progression`, available post-encounter). Tag each separately.
+3. For each fact, derive the metadata `enemy-tier` and `puzzle-tier` from its spoiler tag. `none` → tier 0; `progression` → 1; `late-game` → 2; `story` → 3; `dlc:<name>` → tier-of-dlc-content + dlc flag.
+4. Output a classified version of the result with each fact prefixed by its tags, preserving original wording verbatim. No omissions; high tiers get tagged for gated display, not deleted.
+5. Surface ambiguous calls in a short report — facts where the spoiler tier wasn't clear from context — for the main agent to confirm with the user before appending.
 
 **Why a separate agent:** holding "go maximum depth" and "filter by spoiler tier" in the same context produces shallow research; classification needs the full result in front of it without the depth-pressure that produced the result. The split also makes tier raises cheap later — the user advances, the main agent re-runs the *display* filter against already-classified content, no re-research needed.
 
@@ -68,9 +74,10 @@ Do not overwrite existing content; append or create per-file.
 
 `_source: <tool> <date> · confidence: <high|medium|low> · enemy-tier: <N> · puzzle-tier: <N> · category: mainline · spoiler: <tier>_`
 
-- **Confidence:** `high` if the source named a verifiable fact, `medium` if the value might vary by patch (item weights, exact damage numbers), `low` if it's an inference.
+- **Confidence:** `high` if a verifiable fact corroborated by ≥2 independent sources (separate authors / publications, not the same wiki mirrored elsewhere); `medium` if (a) value may vary by patch (item weights, exact damage numbers), or (b) only one source corroborates, or (c) all sources are forum-thread / community-consensus rather than walkthrough / wiki / dev statement; `low` if inferred from indirect evidence. **Source count beats source authority** — a single high-authority claim is `medium`, not `high`. If the spoiler-classification sub-agent flagged a fact as single-source or contested in its report, the integrator must downgrade confidence regardless of how the source phrased itself.
 - **`enemy-tier` and `puzzle-tier`** come from the classification pass, not the user's current settings — that way display-time filtering can compare the user's *current* tier against the *content's* tier and gate accordingly.
 - **Default `category` is `mainline`;** use `easter-egg` for hidden / side-objective content and `lore` for worldbuilding (hidden until the reader opts in).
+- **Write content, gate display.** Classification tags are read-time display filters, not write-time skip switches. When a fact classifies as `enemy-tier: 3` or `spoiler: story`, write the content into its destination file with inline metadata; the persona handles tier-based reveal at read-time. Do **not** write placeholder stubs (e.g. `_[hidden at current tier — raise tier to access]_`) in lieu of real content — placeholders strand content the user opted into seeing once they raise a tier. The only exception is `dlc:<name>` content from a phase not yet ingested (no content exists to write).
 
 ### 6. Phase-specific behavior
 
