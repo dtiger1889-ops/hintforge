@@ -486,7 +486,7 @@ This is the backbone (see `principles.md` Principle #1). Don't skip; don't defau
    - **Output format**:
      - Markdown tables for tabular content (specs, tiers, comparison charts, drop tables, location inventories).
      - Prose for narrative and mechanism explanation.
-     - **Per-fact source attribution**, one of: `[Confirmed: N sources, M languages]` / `[Single source — verify]` / `[Contradicted across sources — see notes]` / `[Hypothesis — unverified]`.
+     - **Per-fact source attribution**, one of: `[Confirmed: N sources, M languages]` / `[Single source — verify · class:<class>]` / `[Contradicted across sources — see notes]` / `[Hypothesis — unverified]`. The `class:<class>` tag on single-source flags records the source's authority class so downstream gap-fill (P3) can decide drop / translate / keep without re-litigating credibility from URL guesswork. Enum: `forum` (user-generated — Steam Community threads, Reddit posts, Discord) · `community-wiki` (Fandom, gamepedia mirrors, open-edit) · `editorial-en` (English editorial — GameRant, PC Gamer, Eurogamer, IGN, GamesRadar, Polygon, etc.) · `editorial-non-en` (non-English editorial — VGTimes.ru, StopGame.ru, DTF.ru, 4Gamer.net, GameWatch.jp, gry-online.pl, etc.) · `datamining` (extracted from game files, mod-exposed internals, modder-Discord deep-dive) · `official-pr` (developer / publisher statements, patch notes, official social).
      - Source URLs at the end of each section, with language and date for each.
      - Text only — no images.
 
@@ -582,6 +582,16 @@ Capture `[RUN_P2]` and `[RUN_P3]`.
 Drop zone: `<game>/research_inbox/p2/`. Ingest P1 before P2 — P1 creates the `architecture.md` scaffold that P2 extends.
 
 **If `[RUN_P3] = true`:** Generate P3 brief to `<game>/research_briefs/p3.txt`. Scope explicitly: list the thin chapters from P1 results and any DLC zones. Same cascade output shape as P1 (Architecture Summary section for DLC-introduced zones + chapter-organized vector-tagged facts). DLC-introduced zone nodes and edges extend the zone graph; DLC-keyed locks extend the locks-and-keys table.
+
+**Gap-fill rubric for prior-phase `[Single source — verify · class:<class>]` flags** — the P3 brief must instruct the researcher to decide drop / keep / rewrite per item based on source class, not by uniform "is there a 2nd English source" treatment:
+
+- `class:forum` / `class:community-wiki` → drop unless a 2nd independent source confirms during P3 research.
+- `class:editorial-en` → keep with caveat unless directly contradicted by a higher-credibility source.
+- `class:editorial-non-en` → **translate the original source verbatim before deciding.** Do not drop solely because no English source corroborates — the cascade's internationalization rule explicitly expects non-Anglophone editorial sources (RU / JP / PL / etc.) to carry mechanics English coverage misses, especially for non-Anglophone-developed games. Quote the relevant claim text from the original-language source and assess on the underlying mechanic, not the English-sourcing gap. If the original-language claim looks like a localization-conflation candidate (e.g. Russian "матка"/queen mapped onto an existing entity rather than a unique one), the resolution is partial-drop / rephrase, not full drop.
+- `class:datamining` → keep with caveat; high credibility on internals.
+- `class:official-pr` → treat as ground truth.
+
+If the original P1 / P2 brief did not stamp source-class (pre-v24 briefs predate this taxonomy), the researcher infers from the URL host on the source citation and proceeds with the rubric above.
 
 Drop zone: `<game>/research_inbox/p3/`.
 

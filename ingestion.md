@@ -78,6 +78,7 @@ Do not overwrite existing content; append or create per-file.
 - **`enemy-tier` and `puzzle-tier`** come from the classification pass, not the user's current settings — that way display-time filtering can compare the user's *current* tier against the *content's* tier and gate accordingly.
 - **Default `category` is `mainline`;** use `easter-egg` for hidden / side-objective content and `lore` for worldbuilding (hidden until the reader opts in).
 - **Write content, gate display.** Classification tags are read-time display filters, not write-time skip switches. When a fact classifies as `enemy-tier: 3` or `spoiler: story`, write the content into its destination file with inline metadata; the persona handles tier-based reveal at read-time. Do **not** write placeholder stubs (e.g. `_[hidden at current tier — raise tier to access]_`) in lieu of real content — placeholders strand content the user opted into seeing once they raise a tier. The only exception is `dlc:<name>` content from a phase not yet ingested (no content exists to write).
+- **No inline meta-confirmation language.** Confidence and corroboration are recorded on the `_source: … · confidence: <tier>_` metadata line and the trailing `[Confirmed: <sources>]` line. Don't repeat it as parenthetical "(CONFIRMED — …)" inside table cells, sentence bodies, or gate-condition descriptions — the metadata lines already carry that signal, and the inline form creates reader noise. Same rule for "(verified)", "(SOURCED)", "(updated)", etc. — keep meta out of the prose.
 
 ### 6. Phase-specific behavior
 
@@ -85,12 +86,25 @@ Do not overwrite existing content; append or create per-file.
 - **P2 ingestion.** Extends an existing `nav/architecture.md` (adds support topology + locks-and-keys sections); creates per-zone gate-list files (`nav/<zone>.md`); writes `nav/localization.md` for `landmark` and `hybrid` games. P1 must be ingested first.
 - **P3 ingestion.** Patches gaps + DLC. May extend the zone graph (DLC-introduced zones), optional content registry (DLC quests), and locks-and-keys table (DLC items unlocking base-game content). Merges into existing `architecture.md`; doesn't replace.
 
-### 7. Update `CHECKPOINT.md`
+### 7. Corpus reconciliation (P2 / P3 only — skip for P1)
+
+For every gap-fill resolution this phase produced that **drops, contradicts, supersedes, or rewords** prior-phase content, locate the orphaned content in the corpus and edit it. Grep the destination subfolders (`sections/`, `items/`, `nav/`, `puzzles/`, `optional_zones/`, `controls.md`, `settings.md`) for the original claim — search anchors include distinctive phrases, the `[Single source — verify]` flag, and the section heading the prior phase wrote it under. For each match:
+
+- **Drop:** delete the entry. Do not leave a "DROPPED — see CHECKPOINT" note in the corpus; the persona reads only the corpus at runtime, not CHECKPOINT.
+- **Contradict:** rewrite with the new resolution and an updated `_source:` line. Strip the prior `[Single source — verify · class:<class>]` flag.
+- **Supersede:** replace the old value (e.g. canonical Neuropolymer cost numbers replacing range estimates).
+- **Reword:** rewrite to match the resolution's phrasing.
+
+**Source-class informs partial vs. full drops.** If the prior-phase verify-flag carried `class:editorial-non-en` (VGTimes.ru, StopGame.ru, DTF.ru, 4Gamer.net, gry-online.pl, etc.) and this phase's gap-fill could not corroborate the claim from English sources, the default is **partial drop** — keep the underlying mechanic with a translation-conflation caveat, drop only the unsupported sub-claim. Non-Anglophone editorial sources for non-Anglophone-developed games disproportionately carry mechanics English coverage misses; that is the entire reason the cascade has an internationalization rule. A full drop on a single `editorial-non-en` source requires a positive contradiction from another source, not just absence of English corroboration.
+
+**Why this step exists.** Resolutions captured only in `CHECKPOINT.md` leak past read-time gating: the persona reads from `sections/`, `items/`, `nav/`, etc., not from CHECKPOINT. A "DROPPED" entry in the CHECKPOINT changelog with the original claim still in `sections/<chapter>.md` means the player gets the dropped claim served at read-time without any of the contradiction context. **Corpus state must reflect the resolution, not just metadata.**
+
+### 8. Update `CHECKPOINT.md`
 
 - `Research preferences: cascade-handoff (P1 ingested YYYY-MM-DD from <source-tool>; P2: ingested/pending/skipped; P3: ingested/pending/skipped)`
-- Add a `## Harness changelog` entry: which phase was ingested, which subfolders received content, approximate token count, any caveats.
+- Add a `## Harness changelog` entry: which phase was ingested, which subfolders received content, approximate token count, any caveats. **For P2/P3, also list each gap-fill resolution and the corpus file/line it acted on** (e.g. "Granny Zina ammo storage — DROPPED, removed `sections/ch2_forester.md` lines 42–44") so the changelog and corpus stay legible against each other.
 
-### 8. Refresh downstream briefs (mandatory)
+### 9. Refresh downstream briefs (mandatory)
 
 After CHECKPOINT is updated and before the file is moved aside, re-read every `<game>/research_briefs/p<N>.txt` for N greater than the just-ingested phase. For each one:
 
@@ -101,13 +115,13 @@ After CHECKPOINT is updated and before the file is moved aside, re-read every `<
 
 This step exists because researchers receiving a stale downstream brief will redo upstream work and miss the actual gap. The cascade is only as good as the downstream-brief refresh between phases.
 
-### 9. Move the ingested file aside
+### 10. Move the ingested file aside
 
 Move the ingested file out of `research_inbox/<phase>/` into `research_inbox/<phase>/_processed/` (create the subfolder if needed) so a future "ingest the research" run doesn't double-process it.
 
-### 10. Show the user a recap
+### 11. Show the user a recap
 
-One-screen summary: subfolders touched, sections added per subfolder, any `confidence: medium` flags, downstream briefs refreshed (with a one-line summary of changes per brief), anything the brief asked for that the result didn't cover.
+One-screen summary: subfolders touched, sections added per subfolder, any `confidence: medium` flags, downstream briefs refreshed (with a one-line summary of changes per brief), corpus reconciliation actions (which prior-phase claims were dropped / rewritten / superseded — with file paths), anything the brief asked for that the result didn't cover. Also sanity-check the first line of every newly-created file to confirm the H1 header rendered cleanly (a class of Write-tool collision artifact that's invisible until a reader opens the file).
 
 ## Integration discipline (applies across all phases)
 
