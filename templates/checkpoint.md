@@ -45,7 +45,7 @@ player_position:
 
 ## Files that matter
 - `CLAUDE.md` — folder rules, hint-ladder format, spoiler discipline
-- `reference.md` — build advice, mechanics (stable)
+- `mechanics.md` — core game-system rules, mechanics, modes (stable)
 - `limitations.md` — blocked sources
 - `puzzles/index.md` / `[areas]/index.md` / `items/` / `sections/` — lookup hubs
 - `persona.md` — voice toggle

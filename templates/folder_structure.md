@@ -53,14 +53,14 @@ Research output (P1 / P2 / P3) carries per-fact `vector:` tags so the integrator
 - `puzzle` — puzzle solutions, mechanics, reset behavior → `puzzles/<puzzle_name>.md`
 - `item` — weapons, consumables, key items, blueprints → `items/<category>.md`
 - `boss` — boss strategies, weaknesses, arena layout → per-game mapping
-- `enemy` — non-boss enemy patterns, weaknesses → `reference.md` or `warning_tiers.md`
+- `enemy` — non-boss enemy patterns, weaknesses → `mechanics.md` or `warning_tiers.md`
 - `lore` — story beats, character arcs, world-building → `sections/<area>.md`
 - `controls` — keybindings, control remaps, input device strategies → `controls.md`
 - `settings` — graphics, audio, accessibility, difficulty options → `settings.md`
 - `build` — loadout strategies, weapon/ability combinations, progression paths → `items/builds.md` (or merge into `items/abilities.md` when ability-focused)
 - `structure` — zone-graph edges, optional content registry entries, support topology, locks-and-keys → `nav/architecture.md`
 - `missable` — overlay tag (combine as `vector: item, missable: yes`) → primary-vector destination + index entry in `sections/<area>.md`
-- `mechanic` — **fallback** for game-system mechanics not specific to one of the above (combat verbs, economy rules, save behavior, NG+) → `reference.md` or `meta_explainer.md`. Use only when no more-specific vector applies; do not absorb `controls` / `settings` / `build` content into this bucket.
+- `mechanic` — game-system mechanics not specific to one of the above (combat verbs, economy rules, save behavior, NG+) → `mechanics.md` or `meta_explainer.md`. Use when no more-specific vector applies; do not absorb `controls` / `settings` / `build` content into this bucket.
 
 The integration step's job is route-and-distribute by tag. One brief writes to ~5 destination files. See `setup_wizard.md` Step 8 ingestion procedure for the routing table.
 
@@ -99,7 +99,7 @@ Skip if the game is fully linear with no missables (rare).
 - `CHECKPOINT.md` — playthrough state (≤80 lines)
 - `controls.md` — **universal** (every game has input). Keybindings + control remaps (PC keyboard/mouse, controller, accessibility rebinds), with a "common remaps players make" section sourced from Stage 0.
 - `settings.md` — **standard for any PC/console game with a settings menu** (i.e. nearly all). Graphics / audio / accessibility settings that meaningfully affect difficulty or perception (motion blur, FOV, HDR, colorblind mode, subtitles, controller deadzones).
-- `reference.md` — stable build/mechanics info that doesn't fit a category
+- `mechanics.md` — core game-system rules, mechanics, modes, cross-zone tracking, patch awareness, accessibility. **Create whenever Stage 0 surfaces mechanic-class content** (combat verbs, system rules, game modes, economy mechanics, etc.) — most games have this. Title as "[Game] — Mechanics Reference" or similar; the content is the game's mechanic-class knowledge surface, not a generic catch-all.
 - `persona.md` — voice toggle
 - `warning_tiers.md` — tier flags
 - `limitations.md` — blocked sources

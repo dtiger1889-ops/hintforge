@@ -14,7 +14,7 @@ This folder is a spoiler-controlled, [PERSONA1]-or-[PERSONA2]-flavored reference
 
 ## Folder map
 - `CHECKPOINT.md` — current playthrough state. Read first for context.
-- `reference.md` — build advice, mechanics. Stable.
+- `mechanics.md` — core game-system rules, mechanics, modes, patch awareness. Stable cross-zone knowledge surface.
 - `limitations.md` — sources I couldn't fully access; URLs preserved.
 - `puzzles/` — by category; `index.md` is the lookup. _(Drop if game has no puzzles.)_
 - `[areas|shrines|zones|polygons]/` — discrete optional locations; `index.md` is the lookup. _(Drop if not applicable.)_
@@ -26,7 +26,7 @@ This folder is a spoiler-controlled, [PERSONA1]-or-[PERSONA2]-flavored reference
 
 ## Workflow
 - When the player arrives at a new section/location, update `CHECKPOINT.md`.
-- When research adds new info, update the relevant subfolder file — don't bloat `reference.md`.
+- When research adds new info, update the relevant subfolder file — don't bloat `mechanics.md`.
 - Every fact: structured-claim form with source + confidence.
 
 > Framework: `../../hintforge/`. See `../../hintforge/principles.md` for the full rule set, `../../hintforge/templates/claim_format.md` for source-citation conventions, and `../../hintforge/ingestion.md` when the user says "ingest the research" (cascade result integration; runs in a fresh session).

@@ -158,6 +158,8 @@ together:
 
 **The hard rule still holds.** Every variable must be DONE, DONE-VIA-PREFILL, or ASKED (now via popup or batched-list). Step 9's enforcement gate runs unchanged: any literal `[VARIABLE]` token in the summary means the wizard isn't done.
 
+**Shell tool selection — Windows note.** When running on Windows, the `Bash` tool is Git Bash (POSIX), not PowerShell. PowerShell-style cmdlets like `New-Item`, `Out-Null`, `Write-Output` will fail there with `command not found`. For filesystem operations on Windows, prefer the dedicated `PowerShell` tool. POSIX commands (`mkdir -p`, `cp`, `mv`, `echo`, `cat`) work in either tool. macOS / Linux: Bash is bash; no special handling needed.
+
 ### Step 0 — Environment check (REQUIRED — do this before anything else)
 
 > **For the AI bot reading this wizard:** before running Step 1 or any other step below, verify the environment supports persistent local filesystem access. This framework writes files to the user's Documents folder and assumes those files persist between sessions. Some environments don't.
@@ -510,12 +512,7 @@ This is the backbone (see `principles.md` Principle #1). Don't skip; don't defau
 
    - **Internationalization rule** — ≥1 non-English source per chapter area; drawn from the source-language set declared in the Architecture Summary. LLM translation is acceptable; flag translated facts with `[translated from: <lang>]`. "Checked, nothing English missed" is a valid positive finding. Padding with low-quality sources to hit a quota is not.
 
-   - **Filename + drop-zone instruction** (verbatim):
-
-     ```
-     Save output as `p1.txt` or `p1.md`.
-     Place the file in `<game>/research_inbox/p1/` (create the folder if it doesn't exist).
-     ```
+   **Brief content constraint — no filesystem paths or save instructions.** The brief is sent verbatim to deep-research tools (Gemini Deep Research, Claude Research, ChatGPT, Perplexity) that have **no filesystem access**. Embedding sandbox-style paths like `<game>/research_inbox/p1/` or instructions like "save output to..." causes those tools to halt and ask "where?" before running the actual research, blocking the handoff. The brief must end after the deep-enough self-check / output format / spoiler handling sections. Filesystem paths, drop-zone meta, and "where to put the result" instructions live ONLY in Step 10's user-facing handoff message — not in the brief file itself.
 
    No pronouns referring to "the wizard," "the framework," or "an AI agent" — the recipient doesn't need that context to act on the request.
 

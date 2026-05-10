@@ -56,13 +56,13 @@ Do not overwrite existing content; append or create per-file.
 | `puzzle` | `puzzles/<puzzle_name>.md` |
 | `item` | `items/<category>.md` |
 | `boss` | per-game mapping (optional-zone boss → discrete-zone file; main-story boss → `sections/<area>.md`) |
-| `enemy` | `reference.md` or `warning_tiers.md` |
+| `enemy` | `mechanics.md` or `warning_tiers.md` |
 | `lore` | `sections/<area>.md` |
 | `controls` | `controls.md` (game-folder root) — create if absent |
 | `settings` | `settings.md` (game-folder root) — create if absent |
 | `build` | `items/builds.md` — create if absent; or merge into existing `items/<category>.md` (e.g. `items/abilities.md`) when the build is ability-focused |
 | `missable` | primary-vector destination + index entry in `sections/<area>.md` |
-| `mechanic` | `reference.md` or `meta_explainer.md` (true fallback — only when no more-specific vector applies) |
+| `mechanic` | `mechanics.md` or `meta_explainer.md` (only when no more-specific vector applies) |
 
 **For `nav` and `structure` facts:** if `nav/` doesn't exist, create it (stub `index.md` + scaffold `architecture.md` from templates). Set `status: research-integrated` on each newly written file. After writing all per-zone files, run a consistency pass: every edge declared in a zone file must appear in `architecture.md`'s edge table, and vice versa. Drift between them is a bug.
 
