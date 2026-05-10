@@ -160,6 +160,8 @@ together:
 
 **Shell tool selection — Windows note.** When running on Windows, the `Bash` tool is Git Bash (POSIX), not PowerShell. PowerShell-style cmdlets like `New-Item`, `Out-Null`, `Write-Output` will fail there with `command not found`. For filesystem operations on Windows, prefer the dedicated `PowerShell` tool. POSIX commands (`mkdir -p`, `cp`, `mv`, `echo`, `cat`) work in either tool. macOS / Linux: Bash is bash; no special handling needed.
 
+**For file content writes — always use the `Write` tool, never a shell.** Templates, `research_briefs/p*.txt`, persona / brief / section files — anything multi-paragraph — must be written with the `Write` tool (path + content), not `pwsh -Command "..."` or `bash -c "cat <<EOF..."` with the body inlined. Windows' command-line max is ~8191 chars and long markdown blows past it, surfacing as `pwsh exited with code 1: The command line is too long`. This rule applies on all platforms; it's just most likely to bite on Windows. Shells are for filesystem ops (mkdir, cp, mv, ls); `Write` is for content.
+
 ### Step 0 — Environment check (REQUIRED — do this before anything else)
 
 > **For the AI bot reading this wizard:** before running Step 1 or any other step below, verify the environment supports persistent local filesystem access. This framework writes files to the user's Documents folder and assumes those files persist between sessions. Some environments don't.
