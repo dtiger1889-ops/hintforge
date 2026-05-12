@@ -1,5 +1,5 @@
 # hintforge — Game-Guide Framework
-<!-- v26 — 2026-05-12 -->
+<!-- v27 — 2026-05-12 -->
 
 Framework + templates for spoiler-controlled, persona-flavored, GitHub-distributable game guides. Per-game guides instantiated from these templates live in **`../Guides/<game>/`** (a sibling `Guides/` folder next to `hintforge/`), not inside this folder. hintforge contains only the framework — no project state, no dev artifacts.
 
@@ -16,6 +16,8 @@ Framework + templates for spoiler-controlled, persona-flavored, GitHub-distribut
 - `instantiation.md` — manual step-by-step for spinning up a new game guide; includes regeneration-discipline rule (what survives a wipe-and-regen)
 - `setup_wizard.md` — first-run prompt-flow spec for an AI-bot-driven setup
 - `ingestion.md` — research-cascade result integration; runs in a fresh session triggered by "ingest the research"
+- `stitch_and_zipper.md` — post-ingestion synthesis pass (cross-system edge detection + redundancy reconciliation)
+- `templates/dependencies.md` — cross-system dependency table (stitch output; created at game-folder root on first stitch run)
 - `os_compatibility.md` — verified-running setup, OS+bot portability roadmap
 - `distribution.md` — GitHub-first publishing + aggregator + wiki-gen vision
 - `templates/` — copy these into a new game folder and fill in placeholders

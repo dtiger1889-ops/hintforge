@@ -26,6 +26,7 @@ If `Guides/` doesn't exist yet, create it first.
 | `templates/warning_tiers.md` | `<game>/warning_tiers.md` | Set initial enemy & puzzle tiers. Default: enemies 0, puzzles 1. |
 | `templates/folder_structure.md` | _read, don't copy_ | Decide which subfolders the game actually needs. |
 | `templates/limitations.md` | `<game>/limitations.md` | Skeleton, fill as research blocks appear. |
+| `templates/dependencies.md` | `<game>/dependencies.md` | Created on first stitch run, not at instantiation. Listed here for awareness. |
 | `templates/claim_format.md` | _read, don't copy_ | Convention for how to write facts. Apply throughout content. |
 
 ### Resolving `[HINTFORGE_VERSION]`
@@ -68,6 +69,7 @@ First session in the new folder, the model reads CHECKPOINT.md and finds placeho
 - Current location in the game
 - Inventory snapshot (if mid-playthrough)
 - Open threads (puzzles he's stuck on, items he's tracking)
+- Initialize `## Phase state`: set `setup: complete YYYY-MM-DD`, all other fields to `not started` or `not run`. This section is the single source of truth for "what's next?" queries — any session can read it to determine which build phase to run next and whether its preconditions are met.
 
 ## Step 6 — Optional: save-watcher
 

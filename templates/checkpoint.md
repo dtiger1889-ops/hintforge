@@ -54,6 +54,26 @@ player_position:
 ## Next step
 [1 line: bot-orientation marker for session resume — area name, quest stage, structural position. NOT a preview of upcoming game content. The player doesn't see this as guidance; the bot reads it to re-orient. See Principle #2.]
 
+## Phase state
+<!-- Builder phase tracking. Read by the phase-readiness check. Updated by setup, ingestion, stitch, and zipper sessions. -->
+<!-- Natural language triggers: "what's next", "is [phase] ready", "I want to redo P2", "run stitch", etc. -->
+<!-- Preconditions: P2 requires P1 ingested or explicit skip-acknowledge. P3 requires P2 ingested or skip-acknowledge. Stitch requires at least P1 ingested. Zipper has no hard precondition but is most useful post-P1. -->
+<!-- Phase-readiness check: any query implying "what should I do next" or naming a phase reads this section and responds with what's complete, what's next, whether preconditions are met, and what's blocking if not. -->
+<!-- stitch_stale flag: set to true when any corpus file receives a new live-observed claim after the stitch: date. Persona surfaces a one-time notice at session start; resets to false when stitch completes. -->
+setup: complete YYYY-MM-DD
+p1_brief: written YYYY-MM-DD | not started
+p1_ingestion: complete YYYY-MM-DD | pending | skipped (reason)
+p2_brief: written YYYY-MM-DD | not started
+p2_ingestion: complete YYYY-MM-DD | pending | skipped (reason)
+p3_brief: written YYYY-MM-DD | not started
+p3_ingestion: complete YYYY-MM-DD | pending | skipped (reason)
+zipper: complete YYYY-MM-DD | not run
+stitch: complete YYYY-MM-DD | not run
+stitch_stale: false
+stitch_scope: full | [comma-separated subdirectory list if scoped]
+gitforge_handle: none
+aggregation_opt_in: false
+
 ## Harness changelog
 ### v1 — YYYY-MM-DD HH:MM UTC
 - Project created from `../../hintforge/templates/`. Subfolders chosen: [list]. Personas chosen: [PERSONA1] / [PERSONA2], active: [DEFAULT]. Warning tiers: enemies [N], puzzles [N].

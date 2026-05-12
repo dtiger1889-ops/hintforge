@@ -123,6 +123,10 @@ Move the ingested file out of `research_inbox/<phase>/` into `research_inbox/<ph
 
 One-screen summary: subfolders touched, sections added per subfolder, any `confidence: medium` flags, downstream briefs refreshed (with a one-line summary of changes per brief), corpus reconciliation actions (which prior-phase claims were dropped / rewritten / superseded — with file paths), anything the brief asked for that the result didn't cover. Also sanity-check the first line of every newly-created file to confirm the H1 header rendered cleanly (a class of Write-tool collision artifact that's invisible until a reader opens the file).
 
+**Update `## Phase state` in CHECKPOINT.** Set the ingested phase's field to `complete YYYY-MM-DD` (e.g. `p1_ingestion: complete 2026-05-12`). If the corresponding brief field is still `not started`, set it to `written YYYY-MM-DD` (the brief existed if ingestion ran). If stitch was previously complete and this ingestion adds new `live-observed` claims, set `stitch_stale: true`.
+
+**Recommended next: stitch and zipper.** Open a new session in this game folder and say "run stitch and zipper" to map cross-system dependencies and reconcile any redundant content axes. Zipper runs first, then stitch. See [`stitch_and_zipper.md`](stitch_and_zipper.md) for the full procedure. For content-light games with few interacting systems, both passes will be short and cheap. For open-world or mechanic-heavy games, stitch is the difference between a corpus that can answer cross-system questions and one that cannot.
+
 ## Integration discipline (applies across all phases)
 
 - **Research fills empty gates; live-observed wins on conflicts about embodied detail.** When research output and user-flagged live-observed content disagree, embodied detail (in-game text the user transcribed, witnessed sequence, recorded gameplay) wins. Research only fills gaps.
