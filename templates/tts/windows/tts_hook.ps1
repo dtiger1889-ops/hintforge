@@ -137,6 +137,12 @@ try {
     $text = [regex]::Replace($text, '\[([^\]]+)\]\([^\)]+\)', '$1')  # markdown links → label
     $text = [regex]::Replace($text, 'https?://\S+', ' ')             # bare URLs
     $text = [regex]::Replace($text, '[*_#>~]', '')                   # markdown emphasis chars
+    # Defensive TTS-output strip: replace em/en dashes with commas. Neural voices read the
+    # raw character as either an awkward overlong pause or the literal word "dash". The
+    # persona template's "When TTS is on" section asks models to avoid em dashes in writing,
+    # but lower-effort models don't always honor it — belt-and-suspenders rather than relying
+    # on model discipline.
+    $text = [regex]::Replace($text, '[–—]', ', ')          # en dash, em dash → comma
     $text = [regex]::Replace($text, '\s+', ' ').Trim()
     if ([string]::IsNullOrWhiteSpace($text)) { exit 0 }
 
