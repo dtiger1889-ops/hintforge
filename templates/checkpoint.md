@@ -52,7 +52,7 @@ player_position:
 - `warning_tiers.md` — tier flags
 
 ## Next step
-[1 line: what to do when this session resumes]
+[1 line: bot-orientation marker for session resume — area name, quest stage, structural position. NOT a preview of upcoming game content. The player doesn't see this as guidance; the bot reads it to re-orient. See Principle #2.]
 
 ## Harness changelog
 ### v1 — YYYY-MM-DD HH:MM UTC

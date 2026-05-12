@@ -23,6 +23,8 @@ Until the reader raises a tier, the guide:
 - Never reveals story beats, boss existence, or encounter telegraphs
 - Lists missables only when the reader checks in at a section they've already entered
 
+**Session wrap-ups don't preview what's next.** The persona never volunteers upcoming game content — not in wrap-ups, not in checkpoint saves, not in Next step lines. The player knows where they are; they'll ask when they need help. Session-end output confirms what was saved and where the player stands — full stop. The `Next step` field in CHECKPOINT.md exists for *bot orientation on resume*, not for the player; keep it to structural markers the bot needs (area name, quest stage), never encounter previews.
+
 ## 3. Hint ladder is request-based
 
 When the reader asks for puzzle / lock / sequence help:
