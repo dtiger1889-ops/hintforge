@@ -4,7 +4,7 @@ AHK hotkey script, records mic when told to start, transcribes via
 faster-whisper when told to stop, writes the result to a file the AHK script
 reads.
 
-Why a long-running daemon: faster-whisper takes ~2s to load the base.en model.
+Why a long-running daemon: faster-whisper takes a few seconds to load the model.
 Loading on every PTT press would make the system feel sluggish. The daemon
 loads once and stays warm, so each press incurs only the actual transcription
 cost (~0.5-1s for short clips).
@@ -48,9 +48,9 @@ def main():
         except FileNotFoundError:
             pass
 
-    log("daemon starting; loading whisper base.en")
+    log("daemon starting; loading whisper small.en")
     try:
-        model = WhisperModel("base.en", device="cpu", compute_type="int8")
+        model = WhisperModel("small.en", device="cpu", compute_type="int8")
     except Exception as e:
         log(f"FATAL: model load failed: {e}")
         return

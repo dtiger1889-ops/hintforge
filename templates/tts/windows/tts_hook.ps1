@@ -90,6 +90,9 @@ try {
         }
     }
     $PID | Out-File -FilePath $pidFile -Encoding ascii -Force
+    # Also write to a well-known temp path so PTT can kill TTS without knowing the game folder.
+    $globalPidFile = Join-Path $env:TEMP "tts_active.pid"
+    $PID | Out-File -FilePath $globalPidFile -Encoding ascii -Force
 
     # Find the most recent assistant message. Stop hook fires *after* the assistant
     # turn, so the message we want is almost always the very last line. Walk
@@ -218,11 +221,15 @@ try {
     $mp.Close()
     Remove-Item $audio -Force -ErrorAction SilentlyContinue
 
-    # Speech finished naturally — clear our pid file if still ours.
+    # Speech finished naturally — clear pid files if still ours.
     try {
         if (Test-Path $pidFile) {
             $cur = (Get-Content $pidFile -ErrorAction SilentlyContinue | Select-Object -First 1)
             if ($cur -eq "$PID") { Remove-Item $pidFile -Force -ErrorAction SilentlyContinue }
+        }
+        if (Test-Path $globalPidFile) {
+            $cur = (Get-Content $globalPidFile -ErrorAction SilentlyContinue | Select-Object -First 1)
+            if ($cur -eq "$PID") { Remove-Item $globalPidFile -Force -ErrorAction SilentlyContinue }
         }
     } catch {}
 }

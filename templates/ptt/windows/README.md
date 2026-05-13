@@ -24,7 +24,7 @@ Pairs naturally with the **TTS module** (`../tts/`) for full voice in + voice ou
   - `numpy` (audio buffer math)
 - **AutoHotkey v2** (NOT v1) — [autohotkey.com/v2](https://www.autohotkey.com/v2/). Required for the hotkey layer; v1 will fail to parse `ptt.ahk`.
 
-First daemon run downloads the `base.en` Whisper model (~150 MB). This happens transparently on first start.
+First daemon run downloads the `small.en` Whisper model (~244 MB). This happens transparently on first start.
 
 ## Installation (manual)
 
@@ -52,7 +52,7 @@ Cross-platform launchers are on the framework roadmap.
   - **Known-good keys** (verified to work with AHK v2 + this template): `NumpadAdd`, `CapsLock`, `F13`–`F24`, `ScrollLock`, `RAlt`, `AppsKey`, `MButton`, `XButton1`, `XButton2`.
   - **Anything else:** valid in principle but unverified by us. AHK v2 supports a much larger key list at [autohotkey.com/docs/v2/KeyList.htm](https://www.autohotkey.com/docs/v2/KeyList.htm) — if your choice isn't in the known-good list above and AHK fails to parse on first run, you'll get a clear error pointing at the offending line.
   - **Avoid:** keys you use in-game; bare modifier keys (Ctrl/Alt/Shift/Win — they break combos); regular letters/numbers (you'll trigger PTT every time you type).
-- **Whisper model:** `ptt_daemon.py` uses `base.en` (English-only, ~150 MB, ~0.5–1 s transcription). Swap to `small.en` for slightly better accuracy at higher CPU cost, or `large-v3` for max accuracy if you have a GPU.
+- **Whisper model:** `ptt_daemon.py` uses `small.en` (English-only, ~244 MB, ~1.5–2 s transcription). Swap to `base.en` for faster but lower-quality results, or `large-v3` for max accuracy if you have a GPU.
 - **Window match:** `ptt.ahk` line `CLAUDE_MATCHES := [...]` controls which window gets the paste. Default matches Claude Code Desktop. Adjust if you've renamed the executable or use a different Claude variant.
 
 ## Token cost honesty (Principle #13)

@@ -14,6 +14,7 @@ START_FLAG  := A_Temp . "\ptt_start.flag"
 STOP_FLAG   := A_Temp . "\ptt_stop.flag"
 RESULT_FILE := A_Temp . "\ptt_result.txt"
 READY_FILE  := A_Temp . "\ptt_ready.flag"
+TTS_PID_FILE := A_Temp . "\tts_active.pid"
 
 ; --- Hotkey configuration ---
 ;
@@ -59,12 +60,26 @@ CLAUDE_MATCHES := ["Claude ahk_exe claude.exe", "ahk_exe Claude.exe"]
 ; The HotIf-style dynamic registration below uses PTT_HOTKEY from above.
 Hotkey "*" . PTT_HOTKEY, PttHandler
 
+KillTts() {
+    global TTS_PID_FILE
+    if !FileExist(TTS_PID_FILE)
+        return
+    try {
+        pid := Trim(FileRead(TTS_PID_FILE, "UTF-8"))
+        if (pid != "")
+            Run('powershell -NoProfile -Command "Stop-Process -Id ' . pid . ' -Force -ErrorAction SilentlyContinue"',, "Hide")
+        FileDelete(TTS_PID_FILE)
+    }
+}
+
 PttHandler(thisHotkey) {
     global PTT_HOTKEY, READY_FILE, RESULT_FILE, START_FLAG, STOP_FLAG, CLAUDE_MATCHES
     if !FileExist(READY_FILE) {
-        ; Daemon not yet ready (still loading model). Silently ignore.
         return
     }
+
+    ; Kill any active TTS playback so the mic doesn't pick it up.
+    KillTts()
 
     ; Clear stale result, signal daemon to start.
     if FileExist(RESULT_FILE)
