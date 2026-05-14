@@ -56,7 +56,7 @@ Research output (P1 / P2 / P3) carries per-fact `vector:` tags so the integrator
 - `enemy` — non-boss enemy patterns, weaknesses → `mechanics.md` or `warning_tiers.md`
 - `lore` — story beats, character arcs, world-building → `sections/<area>.md`
 - `controls` — keybindings, control remaps, input device strategies → `controls.md`
-- `settings` — graphics, audio, accessibility, difficulty options → `settings.md`
+- `settings` — settings that affect difficulty, perception, or QoL (organize by game's actual menu tabs, not industry categories) → `settings.md`
 - `build` — loadout strategies, weapon/ability combinations, progression paths → `items/builds.md` (or merge into `items/abilities.md` when ability-focused)
 - `structure` — zone-graph edges, optional content registry entries, support topology, locks-and-keys → `nav/architecture.md`
 - `missable` — overlay tag (combine as `vector: item, missable: yes`) → primary-vector destination + index entry in `sections/<area>.md`
@@ -98,7 +98,7 @@ Skip if the game is fully linear with no missables (rare).
 - `CLAUDE.md` — folder rules (≤30 lines hard cap)
 - `CHECKPOINT.md` — playthrough state (≤80 lines)
 - `controls.md` — **universal** (every game has input). Keybindings + control remaps (PC keyboard/mouse, controller, accessibility rebinds), with a "common remaps players make" section sourced from Stage 0.
-- `settings.md` — **standard for any PC/console game with a settings menu** (i.e. nearly all). Graphics / audio / accessibility settings that meaningfully affect difficulty or perception (motion blur, FOV, HDR, colorblind mode, subtitles, controller deadzones).
+- `settings.md` — **standard for any PC/console game with a settings menu** (i.e. nearly all). **Organize by the game's actual in-game menu tabs** (H2 per tab), not by industry-standard categories like "Graphics" / "Audio" / "Accessibility." Games have wildly different settings menus and reorganize them across patches — the file structure must mirror what the player actually sees when they open Settings, so the persona can give accurate menu paths. If research doesn't confirm the exact tab names, flag them as unverified and correct from live observation.
 - `mechanics.md` — core game-system rules, mechanics, modes, cross-zone tracking, patch awareness, accessibility. **Create whenever Stage 0 surfaces mechanic-class content** (combat verbs, system rules, game modes, economy mechanics, etc.) — most games have this. Title as "[Game] — Mechanics Reference" or similar; the content is the game's mechanic-class knowledge surface, not a generic catch-all.
 - `persona.md` — voice toggle
 - `warning_tiers.md` — tier flags
