@@ -18,13 +18,13 @@ This procedure runs in a **fresh session, separate from setup**, when research r
 
 ### 1. Find the result file
 
-Check `<game>/research_inbox/` subdirectories in order: `p1/`, `p2/`, `p3/`. Pick up any file that isn't `.gitkeep`. Ingest in phase order — P1 first (creates `architecture.md` scaffold), then P2 (extends it), then P3 (patches gaps).
+Check `<game>/research_inbox/` for numbered subdirectories (`p1/`, `p2/`, `p3/`, etc.). The wizard creates the initial set based on the planned research cascade; additional folders (e.g., `p4/`) are created as subsequent briefs are written. Pick up any file that isn't `.gitkeep`. Ingest in phase order — lowest number first, since earlier phases create the scaffold that later phases extend.
 
 If the user attached a file directly, use that instead and ask which phase it belongs to. If all inboxes are empty and no file was attached, ask the user where the result is.
 
 ### 2. Read the brief and result
 
-Read the corresponding phase brief from `<game>/research_briefs/p1.txt` (or `p2.txt`, `p3.txt`) first (so the bot knows what was asked), then the result file(s).
+Read the corresponding phase brief from `<game>/research_briefs/` — match by phase number (e.g., `p1.txt`, `p2.txt`, `p4_weapons_enemies.md`). File extension and descriptive suffixes may vary; match on the `p<N>` prefix. Read the brief first (so the bot knows what was asked), then the result file(s).
 
 Read [`../hintforge/templates/claim_format.md`](templates/claim_format.md) to confirm the metadata convention before writing.
 
