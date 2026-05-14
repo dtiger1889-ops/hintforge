@@ -68,7 +68,7 @@ Do not overwrite existing content; append or create per-file.
 
 **For `landmark` and `hybrid` localization-mechanism classes:** also write the P2 brief's localization-toolkit output to `nav/localization.md` (create from `templates/localization.md` if absent). Skip for `map-system` and `none`-class games.
 
-**For `settings` facts:** organize `settings.md` by the game's actual in-game menu tabs (H2 per tab), not by industry categories like "Graphics" / "Audio" / "Accessibility." Games structure their settings menus differently and reorganize them across patches. Each setting entry must include its exact menu path so the persona can direct the player accurately. If the research doesn't confirm exact tab names, flag them as unverified.
+**For `settings` facts:** organize `settings.md` by the game's actual in-game menu tabs (one `##` heading per tab), not by industry categories like "Graphics" / "Audio" / "Accessibility." Games structure their settings menus differently and reorganize them across patches. Each setting entry must include its exact menu path so the persona can direct the player accurately. If the research doesn't confirm exact tab names, flag them as unverified.
 
 **For all other vectors:** preserve tabular structure; don't flatten tables to prose.
 
